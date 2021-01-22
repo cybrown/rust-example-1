@@ -9,8 +9,8 @@ use std::sync::Mutex;
 
 pub struct LoggerAdapter(PrintlnLogger);
 
-impl LoggerAdapter {
-    pub fn from(println_logger: PrintlnLogger) -> LoggerAdapter {
+impl From<PrintlnLogger> for LoggerAdapter {
+    fn from(println_logger: PrintlnLogger) -> LoggerAdapter {
         LoggerAdapter(println_logger)
     }
 }
@@ -23,22 +23,22 @@ impl Logger for LoggerAdapter {
 
 pub struct UppercaserAdapter(Uppercaser);
 
-impl UppercaserAdapter {
-    pub fn from(uppercaser: Uppercaser) -> UppercaserAdapter {
+impl From<Uppercaser> for UppercaserAdapter {
+    fn from(uppercaser: Uppercaser) -> Self {
         UppercaserAdapter(uppercaser)
     }
 }
 
 impl AppUppercaser for UppercaserAdapter {
     fn to_uppercase(&self, str: String) -> String {
-        return self.0.to_uppercase(str);
+        self.0.to_uppercase(str)
     }
 }
 
 pub struct MutexCounterWrapper(Mutex<SimpleCounter>);
 
-impl MutexCounterWrapper {
-    pub fn from(simple_counter: SimpleCounter) -> MutexCounterWrapper {
+impl From<SimpleCounter> for MutexCounterWrapper {
+    fn from(simple_counter: SimpleCounter) -> Self {
         MutexCounterWrapper(Mutex::new(simple_counter))
     }
 }
@@ -55,8 +55,8 @@ impl Counter for MutexCounterWrapper {
 
 pub struct AtomicCounterAdapter(AtomicCounter);
 
-impl AtomicCounterAdapter {
-    pub fn from(atomic_counter: AtomicCounter) -> AtomicCounterAdapter {
+impl From<AtomicCounter> for AtomicCounterAdapter {
+    fn from(atomic_counter: AtomicCounter) -> Self {
         AtomicCounterAdapter(atomic_counter)
     }
 }

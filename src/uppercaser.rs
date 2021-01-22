@@ -4,7 +4,7 @@ pub struct Uppercaser {}
 
 impl Uppercaser {
     pub fn to_uppercase(&self, str: String) -> String {
-        return str.to_uppercase();
+        str.to_uppercase()
     }
 }
 

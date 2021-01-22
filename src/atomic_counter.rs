@@ -1,4 +1,4 @@
-// A dummy example stateless service
+// An alternative implementation of a Counter service
 
 use std::sync::atomic::{AtomicI32, Ordering};
 

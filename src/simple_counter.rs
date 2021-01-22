@@ -1,4 +1,4 @@
-// A dummy example stateless service
+// A dummy example statefull service
 
 pub struct SimpleCounter {
     value: i32,
@@ -14,7 +14,7 @@ impl SimpleCounter {
     }
 
     pub fn get_value(&self) -> i32 {
-        return self.value;
+        self.value
     }
 }
 
