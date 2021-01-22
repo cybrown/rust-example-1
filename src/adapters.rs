@@ -6,36 +6,48 @@ use std::sync::Mutex;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
-impl Logger for PrintlnLogger {
+pub struct LoggerAdapter(PrintlnLogger);
+
+impl LoggerAdapter {
+    pub fn from(println_logger: PrintlnLogger) -> LoggerAdapter {
+        LoggerAdapter(println_logger)
+    }
+}
+
+impl Logger for LoggerAdapter {
     fn log(&self, line: std::string::String) {
-        self.log(line)
+        self.0.log(line)
     }
 }
 
-impl AppUppercaser for Uppercaser {
+pub struct UppercaserAdapter(Uppercaser);
+
+impl UppercaserAdapter {
+    pub fn from(uppercaser: Uppercaser) -> UppercaserAdapter {
+        UppercaserAdapter(uppercaser)
+    }
+}
+
+impl AppUppercaser for UppercaserAdapter {
     fn to_uppercase(&self, str: String) -> String {
-        return self.to_uppercase(str);
+        return self.0.to_uppercase(str);
     }
 }
 
-pub struct CounterWrapper {
-    counter: Mutex<SimpleCounter>,
-}
+pub struct MutexCounterWrapper(Mutex<SimpleCounter>);
 
-impl CounterWrapper {
-    pub fn new() -> CounterWrapper {
-        CounterWrapper {
-            counter: Mutex::new(SimpleCounter::new()),
-        }
+impl MutexCounterWrapper {
+    pub fn from(simple_counter: SimpleCounter) -> MutexCounterWrapper {
+        MutexCounterWrapper(Mutex::new(simple_counter))
     }
 }
 
-impl Counter for CounterWrapper {
+impl Counter for MutexCounterWrapper {
     fn increment(&self) {
-        self.counter.lock().unwrap().increment()
+        self.0.lock().unwrap().increment()
     }
 
     fn get_value(&self) -> i32 {
-        self.counter.lock().unwrap().get_value()
+        self.0.lock().unwrap().get_value()
     }
 }
