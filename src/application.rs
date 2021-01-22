@@ -11,12 +11,12 @@ pub trait Uppercaser {
 }
 
 // Main application
-pub struct Application<'a> {
-    uppercaser: &'a Rc<dyn Uppercaser>,
-    logger: &'a Rc<dyn Logger>,
+pub struct Application {
+    uppercaser: Rc<dyn Uppercaser>,
+    logger: Rc<dyn Logger>,
 }
 
-impl<'a> Application<'a> {
+impl Application {
     // A method that uses the dependencies
     pub fn run(&self) {
         self.logger.log(String::from("Start app !"));
@@ -26,7 +26,7 @@ impl<'a> Application<'a> {
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: &'a Rc<dyn Uppercaser>, logger: &'a Rc<dyn Logger>) -> Application<'a> {
+    pub fn new(uppercaser: Rc<dyn Uppercaser>, logger: Rc<dyn Logger>) -> Application {
         Application { uppercaser, logger }
     }
 }

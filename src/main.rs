@@ -13,8 +13,8 @@ fn main() {
     let logger: Rc<dyn application::Logger> = Rc::new(PrintlnLogger::new(String::from("app")));
 
     // Instantiate many applications who share the same dependencies
-    let app1 = Application::new(&uppercaser, &logger);
-    let app2 = Application::new(&uppercaser, &logger);
+    let app1 = Application::new(uppercaser.clone(), logger.clone());
+    let app2 = Application::new(uppercaser.clone(), logger.clone());
 
     // Run the applications with the same shared dependencies
     app1.run();
