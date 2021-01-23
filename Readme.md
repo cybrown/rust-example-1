@@ -17,9 +17,12 @@ stateless services in multiple consumers.
 * [x] Run unit tests with equality assertions
 * [x] Create mocks implementing a trait returning a predefined value
 * [ ] Generate a coverage report
-* [ ] Inject mocks with spies to test wether a dependency was called
+* [x] Inject mocks with spies to test wether a dependency was called
 
 ### Database
+* [ ] Setup diesel
+* [ ] Run one query with diesel
+* [ ] Run queries in a thread pool
 
 ### HTTP Client
 
