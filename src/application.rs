@@ -98,7 +98,11 @@ mod tests {
                 mock.expect_get_value().times(0);
                 Rc::new(mock)
             },
-            MockPostDao::new(),
+            {
+                let mut mock = MockPostDao::new();
+                mock.expect_get_posts().returning(|| Ok(vec![]));
+                mock
+            },
         );
 
         app.run();
