@@ -1,4 +1,8 @@
+use crate::application::AppError;
+use crate::application::PostDao;
 use crate::application::{Counter, Logger, Uppercaser as AppUppercaser};
+use crate::db::Post;
+use crate::posts_dao::PostsDao;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
@@ -58,6 +62,20 @@ impl Counter for MutexCounterWrapper {
 
     fn get_value(&self) -> i32 {
         self.0.lock().unwrap().get_value()
+    }
+}
+
+pub struct PostDaoWrapper(PostsDao);
+
+impl From<PostsDao> for PostDaoWrapper {
+    fn from(post_dao: PostsDao) -> Self {
+        PostDaoWrapper(post_dao)
+    }
+}
+
+impl PostDao for PostDaoWrapper {
+    fn get_posts(&self) -> Result<Vec<Post>, AppError> {
+        self.0.get_posts().or_else(|_| Err(AppError {}))
     }
 }
 

@@ -19,9 +19,16 @@ stateless services in multiple consumers.
 * [ ] Generate a coverage report
 * [x] Inject mocks with spies to test wether a dependency was called
 
+### Error handling
+* [x] Seperate error between services and consumers
+* [ ] Try anyhow
+* [ ] Try thiserror
+
 ### Database
-* [ ] Setup diesel
-* [ ] Run one query with diesel
+* [x] Setup diesel
+* [x] Run at least one data query with diesel
+* [ ] Run at least one data update query with diesel
+* [ ] Transactions
 * [ ] Run queries in a thread pool
 
 ### HTTP Client

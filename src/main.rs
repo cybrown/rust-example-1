@@ -1,9 +1,15 @@
 mod adapters;
 mod application;
+mod db;
+mod posts_dao;
 mod println_logger;
+mod schema;
 mod service_registry;
 mod simple_counter;
 mod uppercaser;
+
+#[macro_use]
+extern crate diesel;
 
 use crate::service_registry::ServiceRegistry;
 use adapters::{LoggerAdapter, MutexCounterWrapper, UppercaserAdapter};

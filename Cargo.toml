@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 mockall = "0.9.0"
+diesel = { version = "1.4.5", features = ["postgres"] }
 
 [[bin]]
 name = "rust30"

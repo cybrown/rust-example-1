@@ -1,3 +1,4 @@
+use crate::db::Post;
 use mockall::predicate::*;
 use mockall::*;
 
@@ -20,14 +21,29 @@ pub trait Counter {
     fn get_value(&self) -> i32;
 }
 
+#[automock]
+pub trait PostDao {
+    fn get_posts(&self) -> Result<Vec<Post>, AppError>;
+}
+
+#[derive(Debug)]
+pub struct AppError;
+
+impl std::convert::From<diesel::result::Error> for AppError {
+    fn from(_: diesel::result::Error) -> Self {
+        Self {}
+    }
+}
+
 // Main application
-pub struct Application<U: Uppercaser, L: Logger, C: Counter> {
+pub struct Application<U: Uppercaser, L: Logger, C: Counter, P: PostDao> {
     uppercaser: U,
     logger: L,
     counter: C,
+    post_dao: P,
 }
 
-impl<U: Uppercaser, L: Logger, C: Counter> Application<U, L, C> {
+impl<U: Uppercaser, L: Logger, C: Counter, P: PostDao> Application<U, L, C, P> {
     // A method that uses the dependencies
     pub fn run(&self) {
         self.logger.log("Start app !".to_owned());
@@ -35,14 +51,23 @@ impl<U: Uppercaser, L: Logger, C: Counter> Application<U, L, C> {
         let k = "hello".to_owned();
         let c = self.uppercaser.to_uppercase(k);
         println!("Hello: {}", c);
+        self.post_dao
+            .get_posts()
+            .map(|posts| {
+                for post in posts {
+                    println!("Post: {}", post.title);
+                }
+            })
+            .unwrap();
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: U, logger: L, counter: C) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: C, post_dao: P) -> Self {
         Self {
             uppercaser,
             logger,
             counter,
+            post_dao,
         }
     }
 }
@@ -72,6 +97,7 @@ mod tests {
                 mock.expect_get_value().times(0);
                 mock
             },
+            MockPostDao::new(),
         );
 
         app.run();
