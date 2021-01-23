@@ -26,9 +26,9 @@ pub struct Application {
 impl Application {
     // A method that uses the dependencies
     pub fn run(&self) {
-        self.logger.log(String::from("Start app !"));
+        self.logger.log("Start app !".to_owned());
         self.counter.increment();
-        let k: String = String::from("hello");
+        let k = "hello".to_owned();
         let c = self.uppercaser.to_uppercase(k);
         println!("Hello: {}", c);
     }

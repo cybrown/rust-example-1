@@ -15,6 +15,6 @@ mod tests {
     #[test]
     fn test_uppercase_a() {
         let a = Uppercaser {};
-        assert_eq!(a.to_uppercase(String::from("a")), "A");
+        assert_eq!(a.to_uppercase("a".to_owned()), "A");
     }
 }

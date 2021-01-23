@@ -18,7 +18,7 @@ impl From<PrintlnLogger> for LoggerAdapter {
 }
 
 impl Logger for LoggerAdapter {
-    fn log(&self, line: std::string::String) {
+    fn log(&self, line: String) {
         self.0.log(line)
     }
 }

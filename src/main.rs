@@ -16,7 +16,7 @@ use std::rc::Rc;
 fn main() {
     // Instantiate the shared dependencies
     let uppercaser = Rc::new(UppercaserAdapter::from(uppercaser::Uppercaser {}));
-    let logger = Rc::new(LoggerAdapter::from(PrintlnLogger::new(String::from("app"))));
+    let logger = Rc::new(LoggerAdapter::from(PrintlnLogger::new("app".to_owned())));
     let use_atomic = true;
     let counter: Rc<dyn application::Counter> = if use_atomic {
         Rc::new(AtomicCounterAdapter::from(AtomicCounter::new()))
