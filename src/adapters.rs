@@ -78,6 +78,12 @@ impl PostDao for PostDaoWrapper {
     fn get_posts(&self) -> Result<Vec<Post>, AppError> {
         self.0.get_posts().or_else(|_| Err(AppError {}))
     }
+
+    fn create_post(&self, title: String, body: String) -> std::result::Result<Post, AppError> {
+        self.0
+            .insert_post(title, body)
+            .or_else(|_| Err(AppError {}))
+    }
 }
 
 // Counter with Atomic

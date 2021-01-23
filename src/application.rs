@@ -25,6 +25,7 @@ pub trait Counter {
 #[automock]
 pub trait PostDao {
     fn get_posts(&self) -> Result<Vec<Post>, AppError>;
+    fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
 }
 
 #[derive(Debug)]
@@ -59,6 +60,9 @@ impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
                     println!("Post: {}", post.title);
                 }
             })
+            .unwrap();
+        self.post_dao
+            .create_post("hello 2".to_owned(), "another body".to_owned())
             .unwrap();
     }
 
@@ -101,6 +105,8 @@ mod tests {
             {
                 let mut mock = MockPostDao::new();
                 mock.expect_get_posts().returning(|| Ok(vec![]));
+                mock.expect_create_post()
+                    .returning(|_, _| Ok(Post::default()));
                 mock
             },
         );

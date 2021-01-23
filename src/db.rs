@@ -5,7 +5,7 @@ pub fn connect() -> PgConnection {
     PgConnection::establish("postgres://postgres@localhost/postgres").expect("ok")
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Default)]
 pub struct Post {
     pub id: i32,
     pub title: String,

@@ -27,13 +27,23 @@ stateless services in multiple consumers.
 ### Database
 * [x] Setup diesel
 * [x] Run at least one data query with diesel
-* [ ] Run at least one data update query with diesel
+* [x] Run at least one data update query with diesel
 * [ ] Transactions
-* [ ] Run queries in a thread pool
-
-### HTTP Client
+* [ ] Run sql queries in a thread pool
 
 ### HTTP Server
+* [ ] Setup a web framework to return json
+* [ ] Route to get all posts
+* [ ] Route to create a post
+* [ ] Route to publish a post
+* [ ] Route to unpublish a post
+* [ ] Investigate open api v3
+
+### Command line arguments
+
+### Environment variables
+
+### HTTP Client
 
 ### Sockets
 
