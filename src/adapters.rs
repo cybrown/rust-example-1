@@ -7,11 +7,13 @@ use std::sync::Mutex;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
+// Logger
+
 pub struct LoggerAdapter(PrintlnLogger);
 
 impl From<PrintlnLogger> for LoggerAdapter {
-    fn from(println_logger: PrintlnLogger) -> LoggerAdapter {
-        LoggerAdapter(println_logger)
+    fn from(println_logger: PrintlnLogger) -> Self {
+        Self(println_logger)
     }
 }
 
@@ -21,11 +23,13 @@ impl Logger for LoggerAdapter {
     }
 }
 
+// Uppercaser
+
 pub struct UppercaserAdapter(Uppercaser);
 
 impl From<Uppercaser> for UppercaserAdapter {
     fn from(uppercaser: Uppercaser) -> Self {
-        UppercaserAdapter(uppercaser)
+        Self(uppercaser)
     }
 }
 
@@ -35,11 +39,13 @@ impl AppUppercaser for UppercaserAdapter {
     }
 }
 
+// Counter with Mutex
+
 pub struct MutexCounterWrapper(Mutex<SimpleCounter>);
 
 impl From<SimpleCounter> for MutexCounterWrapper {
     fn from(simple_counter: SimpleCounter) -> Self {
-        MutexCounterWrapper(Mutex::new(simple_counter))
+        Self(Mutex::new(simple_counter))
     }
 }
 
@@ -53,11 +59,13 @@ impl Counter for MutexCounterWrapper {
     }
 }
 
+// Counter with Atomic
+
 pub struct AtomicCounterAdapter(AtomicCounter);
 
 impl From<AtomicCounter> for AtomicCounterAdapter {
     fn from(atomic_counter: AtomicCounter) -> Self {
-        AtomicCounterAdapter(atomic_counter)
+        Self(atomic_counter)
     }
 }
 

@@ -38,8 +38,8 @@ impl Application {
         uppercaser: Rc<dyn Uppercaser>,
         logger: Rc<dyn Logger>,
         counter: Rc<dyn Counter>,
-    ) -> Application {
-        Application {
+    ) -> Self {
+        Self {
             uppercaser,
             logger,
             counter,
