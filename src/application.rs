@@ -1,6 +1,5 @@
 use mockall::predicate::*;
 use mockall::*;
-use std::rc::Rc;
 
 // Expected interface for a logger
 #[automock]
@@ -22,13 +21,13 @@ pub trait Counter {
 }
 
 // Main application
-pub struct Application {
-    uppercaser: Rc<dyn Uppercaser>,
-    logger: Rc<dyn Logger>,
-    counter: Rc<dyn Counter>,
+pub struct Application<U: Uppercaser, L: Logger, C: Counter> {
+    uppercaser: U,
+    logger: L,
+    counter: C,
 }
 
-impl Application {
+impl<U: Uppercaser, L: Logger, C: Counter> Application<U, L, C> {
     // A method that uses the dependencies
     pub fn run(&self) {
         self.logger.log("Start app !".to_owned());
@@ -39,11 +38,7 @@ impl Application {
     }
 
     // Injection through constructor
-    pub fn new(
-        uppercaser: Rc<dyn Uppercaser>,
-        logger: Rc<dyn Logger>,
-        counter: Rc<dyn Counter>,
-    ) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: C) -> Self {
         Self {
             uppercaser,
             logger,
@@ -76,7 +71,7 @@ mod tests {
             mock.expect_get_value().times(0);
             mock
         };
-        let app = Application::new(Rc::new(uppercaser), Rc::new(logger), Rc::new(counter));
+        let app = Application::new(uppercaser, logger, counter);
 
         app.run();
     }

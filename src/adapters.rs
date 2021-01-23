@@ -2,13 +2,14 @@ use crate::application::{Counter, Logger, Uppercaser as AppUppercaser};
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
-use crate::AtomicCounter;
+use std::rc::Rc;
 use std::sync::Mutex;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
 // Logger
 
+#[derive(Clone)]
 pub struct LoggerAdapter(PrintlnLogger);
 
 impl From<PrintlnLogger> for LoggerAdapter {
@@ -25,6 +26,7 @@ impl Logger for LoggerAdapter {
 
 // Uppercaser
 
+#[derive(Copy, Clone)]
 pub struct UppercaserAdapter(Uppercaser);
 
 impl From<Uppercaser> for UppercaserAdapter {
@@ -41,11 +43,12 @@ impl AppUppercaser for UppercaserAdapter {
 
 // Counter with Mutex
 
-pub struct MutexCounterWrapper(Mutex<SimpleCounter>);
+#[derive(Clone)]
+pub struct MutexCounterWrapper(Rc<Mutex<SimpleCounter>>);
 
 impl From<SimpleCounter> for MutexCounterWrapper {
     fn from(simple_counter: SimpleCounter) -> Self {
-        Self(Mutex::new(simple_counter))
+        Self(Rc::new(Mutex::new(simple_counter)))
     }
 }
 
@@ -59,6 +62,7 @@ impl Counter for MutexCounterWrapper {
     }
 }
 
+/*
 // Counter with Atomic
 
 pub struct AtomicCounterAdapter(AtomicCounter);
@@ -78,3 +82,4 @@ impl Counter for AtomicCounterAdapter {
         self.0.get_value()
     }
 }
+*/

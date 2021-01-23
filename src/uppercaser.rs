@@ -1,5 +1,6 @@
 // A dummy example stateless service
 
+#[derive(Copy, Clone)]
 pub struct Uppercaser {}
 
 impl Uppercaser {
