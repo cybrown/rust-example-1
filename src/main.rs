@@ -1,5 +1,6 @@
 mod adapters;
 mod application;
+mod atomic_counter;
 mod db;
 mod posts_dao;
 mod println_logger;

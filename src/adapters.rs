@@ -1,6 +1,7 @@
 use crate::application::AppError;
 use crate::application::PostDao;
 use crate::application::{Counter, Logger, Uppercaser as AppUppercaser};
+use crate::atomic_counter::AtomicCounter;
 use crate::db::Post;
 use crate::posts_dao::PostsDao;
 use crate::println_logger::PrintlnLogger;
@@ -79,7 +80,6 @@ impl PostDao for PostDaoWrapper {
     }
 }
 
-/*
 // Counter with Atomic
 
 pub struct AtomicCounterAdapter(AtomicCounter);
@@ -99,4 +99,3 @@ impl Counter for AtomicCounterAdapter {
         self.0.get_value()
     }
 }
-*/

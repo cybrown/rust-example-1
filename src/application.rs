@@ -1,6 +1,7 @@
 use crate::db::Post;
 use mockall::predicate::*;
 use mockall::*;
+use std::rc::Rc;
 
 // Expected interface for a logger
 #[automock]
@@ -36,14 +37,14 @@ impl std::convert::From<diesel::result::Error> for AppError {
 }
 
 // Main application
-pub struct Application<U: Uppercaser, L: Logger, C: Counter, P: PostDao> {
+pub struct Application<U: Uppercaser, L: Logger, P: PostDao> {
     uppercaser: U,
     logger: L,
-    counter: C,
+    counter: Rc<dyn Counter>,
     post_dao: P,
 }
 
-impl<U: Uppercaser, L: Logger, C: Counter, P: PostDao> Application<U, L, C, P> {
+impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
     // A method that uses the dependencies
     pub fn run(&self) {
         self.logger.log("Start app !".to_owned());
@@ -62,7 +63,7 @@ impl<U: Uppercaser, L: Logger, C: Counter, P: PostDao> Application<U, L, C, P> {
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: U, logger: L, counter: C, post_dao: P) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: Rc<dyn Counter>, post_dao: P) -> Self {
         Self {
             uppercaser,
             logger,
@@ -95,7 +96,7 @@ mod tests {
                 let mut mock = MockCounter::new();
                 mock.expect_increment().times(1).return_const(());
                 mock.expect_get_value().times(0);
-                mock
+                Rc::new(mock)
             },
             MockPostDao::new(),
         );
