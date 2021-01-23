@@ -53,25 +53,26 @@ mod tests {
 
     #[test]
     fn test_run() {
-        let logger = {
-            let mut logger = MockLogger::new();
-            logger.expect_log().times(1).return_const(());
-            logger
-        };
-        let uppercaser = {
-            let mut mock = MockUppercaser::new();
-            mock.expect_to_uppercase()
-                .times(1)
-                .return_const("A".to_owned());
-            mock
-        };
-        let counter = {
-            let mut mock = MockCounter::new();
-            mock.expect_increment().times(1).return_const(());
-            mock.expect_get_value().times(0);
-            mock
-        };
-        let app = Application::new(uppercaser, logger, counter);
+        let app = Application::new(
+            {
+                let mut mock = MockUppercaser::new();
+                mock.expect_to_uppercase()
+                    .times(1)
+                    .return_const("A".to_owned());
+                mock
+            },
+            {
+                let mut logger = MockLogger::new();
+                logger.expect_log().times(1).return_const(());
+                logger
+            },
+            {
+                let mut mock = MockCounter::new();
+                mock.expect_increment().times(1).return_const(());
+                mock.expect_get_value().times(0);
+                mock
+            },
+        );
 
         app.run();
     }
