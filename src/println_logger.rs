@@ -1,6 +1,5 @@
 // A dummy logger with a prefix
 
-#[derive(Clone)]
 pub struct PrintlnLogger {
     prefix: String,
 }

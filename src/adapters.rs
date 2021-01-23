@@ -9,7 +9,6 @@ use std::sync::Mutex;
 
 // Logger
 
-#[derive(Clone)]
 pub struct LoggerAdapter(PrintlnLogger);
 
 impl From<PrintlnLogger> for LoggerAdapter {
