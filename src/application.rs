@@ -1,16 +1,21 @@
+use mockall::predicate::*;
+use mockall::*;
 use std::rc::Rc;
 
 // Expected interface for a logger
+#[automock]
 pub trait Logger {
     fn log(&self, str: String);
 }
 
 // Expected interface for a dummy service to uppercase a string
+#[automock]
 pub trait Uppercaser {
     fn to_uppercase(&self, str: String) -> String;
 }
 
 // Expected interface for a counter
+#[automock]
 pub trait Counter {
     fn increment(&self);
     fn get_value(&self) -> i32;
@@ -50,81 +55,29 @@ impl Application {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::cell::RefCell;
-
-    struct LoggerMock {
-        pub called: RefCell<bool>,
-    }
-
-    impl LoggerMock {
-        fn new() -> Self {
-            Self {
-                called: RefCell::new(false),
-            }
-        }
-    }
-
-    impl Logger for LoggerMock {
-        fn log(&self, _: std::string::String) {
-            *self.called.borrow_mut() = true;
-        }
-    }
-
-    struct UppercaserMock {
-        pub called: RefCell<bool>,
-    }
-
-    impl UppercaserMock {
-        fn new() -> Self {
-            Self {
-                called: RefCell::new(false),
-            }
-        }
-    }
-
-    impl Uppercaser for UppercaserMock {
-        fn to_uppercase(&self, _: std::string::String) -> std::string::String {
-            *self.called.borrow_mut() = true;
-            String::from("A")
-        }
-    }
-
-    struct CounterMock {
-        pub increment_called: RefCell<bool>,
-        pub get_value_called: RefCell<bool>,
-    }
-
-    impl CounterMock {
-        fn new() -> Self {
-            Self {
-                increment_called: RefCell::new(false),
-                get_value_called: RefCell::new(false),
-            }
-        }
-    }
-
-    impl Counter for CounterMock {
-        fn increment(&self) {
-            *self.increment_called.borrow_mut() = true;
-        }
-        fn get_value(&self) -> i32 {
-            *self.get_value_called.borrow_mut() = true;
-            0
-        }
-    }
 
     #[test]
     fn test_run() {
-        let logger = Rc::new(LoggerMock::new());
-        let uppercaser = Rc::new(UppercaserMock::new());
-        let counter = Rc::new(CounterMock::new());
-        let app = Application::new(uppercaser.clone(), logger.clone(), counter.clone());
+        let logger = {
+            let mut logger = MockLogger::new();
+            logger.expect_log().times(1).return_const(());
+            logger
+        };
+        let uppercaser = {
+            let mut mock = MockUppercaser::new();
+            mock.expect_to_uppercase()
+                .times(1)
+                .return_const("A".to_owned());
+            mock
+        };
+        let counter = {
+            let mut mock = MockCounter::new();
+            mock.expect_increment().times(1).return_const(());
+            mock.expect_get_value().times(0);
+            mock
+        };
+        let app = Application::new(Rc::new(uppercaser), Rc::new(logger), Rc::new(counter));
 
         app.run();
-
-        assert_eq!(true, *logger.called.borrow());
-        assert_eq!(true, *uppercaser.called.borrow());
-        assert_eq!(true, *counter.increment_called.borrow());
-        assert_eq!(false, *counter.get_value_called.borrow());
     }
 }
