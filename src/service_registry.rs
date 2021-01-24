@@ -25,7 +25,7 @@ impl ServiceRegistry {
         }
     }
 
-    fn get_logger(&self, prefix: String) -> LoggerAdapter {
+    pub fn get_logger(&self, prefix: String) -> LoggerAdapter {
         LoggerAdapter::from(PrintlnLogger::new(prefix))
     }
 
@@ -38,7 +38,7 @@ impl ServiceRegistry {
         }
     }
 
-    fn get_uppercaser(&self) -> UppercaserAdapter {
+    pub fn get_uppercaser(&self) -> UppercaserAdapter {
         UppercaserAdapter::from(Uppercaser {})
     }
 
