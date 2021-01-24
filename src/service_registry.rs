@@ -1,15 +1,15 @@
 use crate::adapters::AtomicCounterAdapter;
+use crate::adapters::LoggerAdapter;
+use crate::adapters::MutexCounterWrapper;
 use crate::adapters::PostDaoWrapper;
+use crate::adapters::UppercaserAdapter;
+use crate::application::Application;
+use crate::application::Counter;
 use crate::atomic_counter::AtomicCounter;
 use crate::posts_dao::PostsDao;
+use crate::println_logger::PrintlnLogger;
+use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
-use crate::Application;
-use crate::Counter;
-use crate::LoggerAdapter;
-use crate::MutexCounterWrapper;
-use crate::PrintlnLogger;
-use crate::SimpleCounter;
-use crate::UppercaserAdapter;
 use diesel::PgConnection;
 use std::rc::Rc;
 

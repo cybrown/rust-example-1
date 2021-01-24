@@ -13,10 +13,6 @@ mod uppercaser;
 extern crate diesel;
 
 use crate::service_registry::ServiceRegistry;
-use adapters::{LoggerAdapter, MutexCounterWrapper, UppercaserAdapter};
-use application::{Application, Counter};
-use println_logger::PrintlnLogger;
-use simple_counter::SimpleCounter;
 
 fn main() {
     let sr = ServiceRegistry::new();
