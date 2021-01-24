@@ -1,6 +1,6 @@
-use crate::db::Post;
 use crate::schema::posts;
 use diesel::PgConnection;
+use serde::Serialize;
 
 use diesel::prelude::*;
 
@@ -19,6 +19,14 @@ pub struct UpdatePost<'a> {
     pub title: Option<&'a str>,
     pub body: Option<&'a str>,
     pub published: Option<bool>,
+}
+
+#[derive(Queryable, Default, Serialize)]
+pub struct Post {
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub published: bool,
 }
 
 impl DieselPostDb {

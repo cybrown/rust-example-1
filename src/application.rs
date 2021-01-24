@@ -1,4 +1,4 @@
-use crate::db::Post;
+use crate::diesel_post_db::Post;
 use mockall::predicate::*;
 use mockall::*;
 
