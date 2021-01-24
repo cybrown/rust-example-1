@@ -1,6 +1,6 @@
 use crate::application::AppError;
 use crate::application::PostDb;
-use crate::application::{Counter, Logger, Uppercaser as AppUppercaser};
+use crate::application::{Counter, Logger, Post as AppPost, Uppercaser as AppUppercaser};
 use crate::atomic_counter::AtomicCounter;
 use crate::diesel_post_db::DieselPostDb;
 use crate::diesel_post_db::Post;
@@ -78,18 +78,37 @@ impl From<DieselPostDb> for PostDbWrapper {
 }
 
 impl PostDb for PostDbWrapper {
-    fn get_posts(&self) -> Result<Vec<Post>, AppError> {
+    fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
         self.0
             .lock()
-            .map(|post_db| post_db.get_posts().map_err(|_| AppError {}))
+            .map(|post_db| {
+                post_db
+                    .get_posts()
+                    .map(|posts| posts.iter().map(|post| db_post_to_app_post(post)).collect())
+                    .map_err(|_| AppError {})
+            })
             .map_err(|_| AppError {})?
     }
 
-    fn create_post(&self, title: String, body: String) -> std::result::Result<Post, AppError> {
+    fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
         self.0
             .lock()
-            .map(|post_db| post_db.insert_post(title, body).map_err(|_| AppError {}))
+            .map(|post_db| {
+                post_db
+                    .insert_post(title, body)
+                    .map(|post| db_post_to_app_post(&post))
+                    .map_err(|_| AppError {})
+            })
             .map_err(|_| AppError {})?
+    }
+}
+
+fn db_post_to_app_post(db_post: &Post) -> AppPost {
+    AppPost {
+        id: db_post.id,
+        title: db_post.title.to_owned(),
+        body: db_post.body.to_owned(),
+        published: db_post.published,
     }
 }
 

@@ -1,6 +1,5 @@
 use crate::schema::posts;
 use diesel::PgConnection;
-use serde::Serialize;
 
 use diesel::prelude::*;
 
@@ -21,7 +20,7 @@ pub struct UpdatePost<'a> {
     pub published: Option<bool>,
 }
 
-#[derive(Queryable, Default, Serialize)]
+#[derive(Queryable)]
 pub struct Post {
     pub id: i32,
     pub title: String,

@@ -1,6 +1,6 @@
-use crate::diesel_post_db::Post;
 use mockall::predicate::*;
 use mockall::*;
+use serde::Serialize;
 
 // Expected interface for a logger
 #[automock]
@@ -19,6 +19,14 @@ pub trait Uppercaser {
 pub trait Counter {
     fn increment(&self);
     fn get_value(&self) -> i32;
+}
+
+#[derive(Serialize)]
+pub struct Post {
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub published: bool,
 }
 
 #[automock]
@@ -104,8 +112,14 @@ mod tests {
             {
                 let mut mock = MockPostDb::new();
                 mock.expect_get_posts().returning(|| Ok(vec![]));
-                mock.expect_create_post()
-                    .returning(|_, _| Ok(Post::default()));
+                mock.expect_create_post().returning(|_, _| {
+                    Ok(Post {
+                        id: 0,
+                        title: "".to_owned(),
+                        body: "".to_owned(),
+                        published: false,
+                    })
+                });
                 mock
             },
         );
