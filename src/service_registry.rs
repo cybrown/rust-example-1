@@ -11,21 +11,17 @@ use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
 use diesel::PgConnection;
-use std::rc::Rc;
 
 pub struct ServiceRegistry {
-    counter: Rc<dyn Counter>,
+    atomic_counter: AtomicCounterAdapter,
+    mutex_counter: MutexCounterWrapper,
 }
 
 impl ServiceRegistry {
     pub fn new() -> Self {
-        let use_atomic = true;
         Self {
-            counter: if use_atomic {
-                Rc::new(AtomicCounterAdapter::from(AtomicCounter::new()))
-            } else {
-                Rc::new(MutexCounterWrapper::from(SimpleCounter::new()))
-            },
+            atomic_counter: AtomicCounterAdapter::from(AtomicCounter::new()),
+            mutex_counter: MutexCounterWrapper::from(SimpleCounter::new()),
         }
     }
 
@@ -33,8 +29,13 @@ impl ServiceRegistry {
         LoggerAdapter::from(PrintlnLogger::new(prefix))
     }
 
-    pub fn get_counter(&self) -> Rc<dyn Counter> {
-        self.counter.clone()
+    pub fn get_counter(&self) -> Box<dyn Counter> {
+        let use_atomic = true;
+        if use_atomic {
+            Box::new(self.atomic_counter.clone())
+        } else {
+            Box::new(self.mutex_counter.clone())
+        }
     }
 
     fn get_uppercaser(&self) -> UppercaserAdapter {

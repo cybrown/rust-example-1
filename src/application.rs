@@ -1,7 +1,6 @@
 use crate::db::Post;
 use mockall::predicate::*;
 use mockall::*;
-use std::rc::Rc;
 
 // Expected interface for a logger
 #[automock]
@@ -41,7 +40,7 @@ impl std::convert::From<diesel::result::Error> for AppError {
 pub struct Application<U: Uppercaser, L: Logger, P: PostDao> {
     uppercaser: U,
     logger: L,
-    counter: Rc<dyn Counter>,
+    counter: Box<dyn Counter>,
     post_dao: P,
 }
 
@@ -67,7 +66,7 @@ impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: U, logger: L, counter: Rc<dyn Counter>, post_dao: P) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: Box<dyn Counter>, post_dao: P) -> Self {
         Self {
             uppercaser,
             logger,
@@ -97,10 +96,10 @@ mod tests {
                 logger
             },
             {
-                let mut mock = MockCounter::new();
+                let mut mock = Box::new(MockCounter::new());
                 mock.expect_increment().times(1).return_const(());
                 mock.expect_get_value().times(0);
-                Rc::new(mock)
+                mock
             },
             {
                 let mut mock = MockPostDao::new();

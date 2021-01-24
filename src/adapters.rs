@@ -88,11 +88,12 @@ impl PostDao for PostDaoWrapper {
 
 // Counter with Atomic
 
-pub struct AtomicCounterAdapter(AtomicCounter);
+#[derive(Clone)]
+pub struct AtomicCounterAdapter(Rc<AtomicCounter>);
 
 impl From<AtomicCounter> for AtomicCounterAdapter {
     fn from(atomic_counter: AtomicCounter) -> Self {
-        Self(atomic_counter)
+        Self(Rc::new(atomic_counter))
     }
 }
 
