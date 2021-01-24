@@ -1,9 +1,9 @@
 use crate::application::AppError;
-use crate::application::PostDao;
+use crate::application::PostDb;
 use crate::application::{Counter, Logger, Uppercaser as AppUppercaser};
 use crate::atomic_counter::AtomicCounter;
 use crate::db::Post;
-use crate::posts_dao::PostsDao;
+use crate::diesel_post_db::DieselPostDb;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
@@ -69,26 +69,26 @@ impl Counter for MutexCounterWrapper {
 }
 
 #[derive(Clone)]
-pub struct PostDaoWrapper(Arc<Mutex<PostsDao>>);
+pub struct PostDbWrapper(Arc<Mutex<DieselPostDb>>);
 
-impl From<PostsDao> for PostDaoWrapper {
-    fn from(post_dao: PostsDao) -> Self {
-        PostDaoWrapper(Arc::new(Mutex::new(post_dao)))
+impl From<DieselPostDb> for PostDbWrapper {
+    fn from(post_db: DieselPostDb) -> Self {
+        PostDbWrapper(Arc::new(Mutex::new(post_db)))
     }
 }
 
-impl PostDao for PostDaoWrapper {
+impl PostDb for PostDbWrapper {
     fn get_posts(&self) -> Result<Vec<Post>, AppError> {
         self.0
             .lock()
-            .map(|posts_dao| posts_dao.get_posts().map_err(|_| AppError {}))
+            .map(|post_db| post_db.get_posts().map_err(|_| AppError {}))
             .map_err(|_| AppError {})?
     }
 
     fn create_post(&self, title: String, body: String) -> std::result::Result<Post, AppError> {
         self.0
             .lock()
-            .map(|posts_dao| posts_dao.insert_post(title, body).map_err(|_| AppError {}))
+            .map(|post_db| post_db.insert_post(title, body).map_err(|_| AppError {}))
             .map_err(|_| AppError {})?
     }
 }

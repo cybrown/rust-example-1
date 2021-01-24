@@ -2,7 +2,7 @@ mod adapters;
 mod application;
 mod atomic_counter;
 mod db;
-mod posts_dao;
+mod diesel_post_db;
 mod println_logger;
 mod schema;
 mod service_registry;
@@ -13,7 +13,7 @@ mod uppercaser;
 extern crate diesel;
 
 use crate::application::Logger;
-use crate::application::PostDao;
+use crate::application::PostDb;
 use crate::application::Uppercaser;
 use crate::service_registry::ServiceRegistry;
 use warp::Filter;
@@ -23,7 +23,7 @@ async fn main() {
     let sr = ServiceRegistry::new();
     let uppercaser = sr.get_uppercaser();
     let logger = sr.get_logger("server".to_owned());
-    let post_dao = sr.get_post_dao();
+    let post_db = sr.get_post_db();
 
     // GET /hello/warp => 200 OK with body "Hello, warp!"
     let hello = warp::path!("hello" / String).map(move |name| {
@@ -32,7 +32,7 @@ async fn main() {
     });
 
     let get_posts = warp::path!("posts").map(move || {
-        post_dao
+        post_db
             .get_posts()
             .map(|posts| warp::reply::json(&posts))
             .unwrap()

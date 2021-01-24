@@ -22,7 +22,7 @@ pub trait Counter {
 }
 
 #[automock]
-pub trait PostDao {
+pub trait PostDb {
     fn get_posts(&self) -> Result<Vec<Post>, AppError>;
     fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
 }
@@ -37,14 +37,14 @@ impl From<diesel::result::Error> for AppError {
 }
 
 // Main application
-pub struct Application<U: Uppercaser, L: Logger, P: PostDao> {
+pub struct Application<U: Uppercaser, L: Logger, P: PostDb> {
     uppercaser: U,
     logger: L,
     counter: Box<dyn Counter>,
-    post_dao: P,
+    post_db: P,
 }
 
-impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
+impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
     // A method that uses the dependencies
     pub fn run(&self) {
         self.logger.log("Start app !".to_owned());
@@ -52,7 +52,7 @@ impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
         let k = "hello".to_owned();
         let c = self.uppercaser.to_uppercase(k);
         println!("Hello: {}", c);
-        self.post_dao
+        self.post_db
             .get_posts()
             .map(|posts| {
                 for post in posts {
@@ -60,18 +60,18 @@ impl<U: Uppercaser, L: Logger, P: PostDao> Application<U, L, P> {
                 }
             })
             .unwrap();
-        self.post_dao
+        self.post_db
             .create_post("hello 2".to_owned(), "another body".to_owned())
             .unwrap();
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: U, logger: L, counter: Box<dyn Counter>, post_dao: P) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: Box<dyn Counter>, post_db: P) -> Self {
         Self {
             uppercaser,
             logger,
             counter,
-            post_dao,
+            post_db,
         }
     }
 }
@@ -102,7 +102,7 @@ mod tests {
                 mock
             },
             {
-                let mut mock = MockPostDao::new();
+                let mut mock = MockPostDb::new();
                 mock.expect_get_posts().returning(|| Ok(vec![]));
                 mock.expect_create_post()
                     .returning(|_, _| Ok(Post::default()));

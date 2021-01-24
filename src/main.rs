@@ -2,7 +2,7 @@ mod adapters;
 mod application;
 mod atomic_counter;
 mod db;
-mod posts_dao;
+mod diesel_post_db;
 mod println_logger;
 mod schema;
 mod service_registry;

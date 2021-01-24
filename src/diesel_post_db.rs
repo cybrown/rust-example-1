@@ -4,7 +4,7 @@ use diesel::PgConnection;
 
 use diesel::prelude::*;
 
-pub struct PostsDao(PgConnection);
+pub struct DieselPostDb(PgConnection);
 
 #[derive(Insertable)]
 #[table_name = "posts"]
@@ -21,7 +21,7 @@ pub struct UpdatePost<'a> {
     pub published: Option<bool>,
 }
 
-impl PostsDao {
+impl DieselPostDb {
     pub fn new(pg: PgConnection) -> Self {
         Self(pg)
     }
