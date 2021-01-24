@@ -8,17 +8,19 @@ use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
 use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::Mutex;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
 // Logger
 
-pub struct LoggerAdapter(PrintlnLogger);
+#[derive(Clone)]
+pub struct LoggerAdapter(Arc<PrintlnLogger>);
 
 impl From<PrintlnLogger> for LoggerAdapter {
     fn from(println_logger: PrintlnLogger) -> Self {
-        Self(println_logger)
+        Self(Arc::new(println_logger))
     }
 }
 

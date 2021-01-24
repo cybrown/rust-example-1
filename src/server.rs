@@ -12,6 +12,7 @@ mod uppercaser;
 #[macro_use]
 extern crate diesel;
 
+use crate::application::Logger;
 use crate::application::Uppercaser;
 use crate::service_registry::ServiceRegistry;
 use warp::Filter;
@@ -20,7 +21,7 @@ use warp::Filter;
 async fn main() {
     let sr = ServiceRegistry::new();
     let uppercaser = sr.get_uppercaser();
-    let logger: &dyn application::Logger = &sr.get_logger("server".to_owned());
+    let logger = sr.get_logger("server".to_owned());
 
     // GET /hello/warp => 200 OK with body "Hello, warp!"
     let hello = warp::path!("hello" / String).map(move |name| {
