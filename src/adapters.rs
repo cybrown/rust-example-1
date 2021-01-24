@@ -68,23 +68,28 @@ impl Counter for MutexCounterWrapper {
     }
 }
 
-pub struct PostDaoWrapper(PostsDao);
+#[derive(Clone)]
+pub struct PostDaoWrapper(Arc<Mutex<PostsDao>>);
 
 impl From<PostsDao> for PostDaoWrapper {
     fn from(post_dao: PostsDao) -> Self {
-        PostDaoWrapper(post_dao)
+        PostDaoWrapper(Arc::new(Mutex::new(post_dao)))
     }
 }
 
 impl PostDao for PostDaoWrapper {
     fn get_posts(&self) -> Result<Vec<Post>, AppError> {
-        self.0.get_posts().or_else(|_| Err(AppError {}))
+        self.0
+            .lock()
+            .map(|posts_dao| posts_dao.get_posts().map_err(|_| AppError {}))
+            .map_err(|_| AppError {})?
     }
 
     fn create_post(&self, title: String, body: String) -> std::result::Result<Post, AppError> {
         self.0
-            .insert_post(title, body)
-            .or_else(|_| Err(AppError {}))
+            .lock()
+            .map(|posts_dao| posts_dao.insert_post(title, body).map_err(|_| AppError {}))
+            .map_err(|_| AppError {})?
     }
 }
 

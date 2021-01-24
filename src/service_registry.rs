@@ -42,7 +42,7 @@ impl ServiceRegistry {
         UppercaserAdapter::from(Uppercaser {})
     }
 
-    fn get_post_dao(&self) -> PostDaoWrapper {
+    pub fn get_post_dao(&self) -> PostDaoWrapper {
         PostDaoWrapper::from(PostsDao::new(self.get_pg_connection()))
     }
 
