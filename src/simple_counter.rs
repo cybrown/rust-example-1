@@ -6,7 +6,7 @@ pub struct SimpleCounter {
 
 impl SimpleCounter {
     pub fn increment(&mut self) {
-        self.value = self.value + 1;
+        self.value += 1;
     }
 
     pub fn new() -> SimpleCounter {
