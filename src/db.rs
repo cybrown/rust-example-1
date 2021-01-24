@@ -1,6 +1,39 @@
-use diesel::pg::PgConnection;
-use diesel::Connection;
+use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::Pool;
+use diesel::PgConnection;
 
-pub fn connect() -> PgConnection {
-    PgConnection::establish("postgres://postgres@localhost/postgres").expect("ok")
+#[derive(Clone)]
+pub struct PgConnectionFactory {
+    pool: Pool<ConnectionManager<PgConnection>>,
+}
+
+impl PgConnectionFactory {
+    pub fn new() -> Result<Self, DbError> {
+        Ok(Self {
+            pool: Pool::builder()
+                .max_size(8)
+                .build(ConnectionManager::<PgConnection>::new(
+                    "postgres://postgres@localhost/postgres",
+                ))
+                .map_err(|_| DbError)?,
+        })
+    }
+
+    pub fn get_connection(
+        &self,
+    ) -> Result<
+        diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>,
+        DbError,
+    > {
+        self.pool.get().map_err(|_| DbError {})
+    }
+}
+
+#[derive(Debug)]
+pub struct DbError;
+
+impl From<diesel::result::Error> for DbError {
+    fn from(_: diesel::result::Error) -> Self {
+        DbError {}
+    }
 }

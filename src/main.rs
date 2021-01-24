@@ -15,7 +15,7 @@ extern crate diesel;
 use crate::service_registry::ServiceRegistry;
 
 fn main() {
-    let sr = ServiceRegistry::new();
+    let sr = ServiceRegistry::new().unwrap();
 
     // Instantiate many applications who share the same dependencies
     let app1 = sr.get_application();

@@ -20,7 +20,7 @@ use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-    let sr = ServiceRegistry::new();
+    let sr = ServiceRegistry::new().unwrap();
     let uppercaser = sr.get_uppercaser();
     let logger = sr.get_logger("server".to_owned());
     let post_db = sr.get_post_db();

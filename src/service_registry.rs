@@ -3,26 +3,31 @@ use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
 use crate::adapters::PostDbWrapper;
 use crate::adapters::UppercaserAdapter;
+use crate::application::AppError;
 use crate::application::Application;
 use crate::application::Counter;
 use crate::atomic_counter::AtomicCounter;
+use crate::db::PgConnectionFactory;
 use crate::diesel_post_db::DieselPostDb;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
-use diesel::PgConnection;
 
 pub struct ServiceRegistry {
     atomic_counter: AtomicCounterAdapter,
     mutex_counter: MutexCounterWrapper,
+    db_connection_factory: PgConnectionFactory,
 }
 
 impl ServiceRegistry {
-    pub fn new() -> Self {
-        Self {
-            atomic_counter: AtomicCounterAdapter::from(AtomicCounter::new()),
-            mutex_counter: MutexCounterWrapper::from(SimpleCounter::new()),
-        }
+    pub fn new() -> Result<Self, AppError> {
+        crate::db::PgConnectionFactory::new()
+            .map(|pg_connection_factory| Self {
+                atomic_counter: AtomicCounterAdapter::from(AtomicCounter::new()),
+                mutex_counter: MutexCounterWrapper::from(SimpleCounter::new()),
+                db_connection_factory: pg_connection_factory,
+            })
+            .map_err(|_| AppError {})
     }
 
     pub fn get_logger(&self, prefix: String) -> LoggerAdapter {
@@ -43,7 +48,7 @@ impl ServiceRegistry {
     }
 
     pub fn get_post_db(&self) -> PostDbWrapper {
-        PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection()))
+        PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
     }
 
     pub fn get_application(&self) -> Application<UppercaserAdapter, LoggerAdapter, PostDbWrapper> {
@@ -55,7 +60,7 @@ impl ServiceRegistry {
         )
     }
 
-    pub fn get_pg_connection(&self) -> PgConnection {
-        crate::db::connect()
+    pub fn get_pg_connection_factory(&self) -> PgConnectionFactory {
+        self.db_connection_factory.clone()
     }
 }
