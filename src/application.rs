@@ -30,7 +30,7 @@ pub trait PostDao {
 #[derive(Debug)]
 pub struct AppError;
 
-impl std::convert::From<diesel::result::Error> for AppError {
+impl From<diesel::result::Error> for AppError {
     fn from(_: diesel::result::Error) -> Self {
         Self {}
     }
