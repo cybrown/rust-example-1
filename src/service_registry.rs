@@ -1,3 +1,4 @@
+use crate::adapters::AsyncPostDbWrapper;
 use crate::adapters::AtomicCounterAdapter;
 use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
@@ -9,9 +10,11 @@ use crate::application::Counter;
 use crate::atomic_counter::AtomicCounter;
 use crate::db::PgConnectionFactory;
 use crate::diesel_post_db::DieselPostDb;
+use crate::post_controller::PostController;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
+use std::sync::Arc;
 
 pub struct ServiceRegistry {
     atomic_counter: AtomicCounterAdapter,
@@ -51,6 +54,10 @@ impl ServiceRegistry {
         PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
     }
 
+    pub fn get_async_post_db(&self) -> AsyncPostDbWrapper {
+        AsyncPostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
+    }
+
     pub fn get_application(&self) -> Application<UppercaserAdapter, LoggerAdapter, PostDbWrapper> {
         Application::new(
             self.get_uppercaser(),
@@ -62,5 +69,9 @@ impl ServiceRegistry {
 
     pub fn get_pg_connection_factory(&self) -> PgConnectionFactory {
         self.db_connection_factory.clone()
+    }
+
+    pub fn get_post_controller(&self) -> PostController {
+        PostController::new(Arc::new(self.get_async_post_db()))
     }
 }

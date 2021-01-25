@@ -4,9 +4,11 @@ use crate::application::{Counter, Logger, Post as AppPost, Uppercaser as AppUppe
 use crate::atomic_counter::AtomicCounter;
 use crate::diesel_post_db::DieselPostDb;
 use crate::diesel_post_db::Post;
+use crate::post_controller::AsyncPostDb;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
+use async_trait::async_trait;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -16,90 +18,131 @@ use std::sync::Mutex;
 // Logger
 
 #[derive(Clone)]
-pub struct LoggerAdapter(Arc<PrintlnLogger>);
+pub struct LoggerAdapter {
+    println_logger: Arc<PrintlnLogger>,
+}
 
 impl From<PrintlnLogger> for LoggerAdapter {
     fn from(println_logger: PrintlnLogger) -> Self {
-        Self(Arc::new(println_logger))
+        Self {
+            println_logger: Arc::new(println_logger),
+        }
     }
 }
 
 impl Logger for LoggerAdapter {
     fn log(&self, line: String) {
-        self.0.log(line)
+        self.println_logger.log(line)
     }
 }
 
 // Uppercaser
 
 #[derive(Copy, Clone)]
-pub struct UppercaserAdapter(Uppercaser);
+pub struct UppercaserAdapter {
+    uppercaser: Uppercaser,
+}
 
 impl From<Uppercaser> for UppercaserAdapter {
     fn from(uppercaser: Uppercaser) -> Self {
-        Self(uppercaser)
+        Self { uppercaser }
     }
 }
 
 impl AppUppercaser for UppercaserAdapter {
     fn to_uppercase(&self, str: String) -> String {
-        self.0.to_uppercase(str)
+        self.uppercaser.to_uppercase(str)
     }
 }
 
 // Counter with Mutex
 
 #[derive(Clone)]
-pub struct MutexCounterWrapper(Rc<Mutex<SimpleCounter>>);
+pub struct MutexCounterWrapper {
+    simple_counter: Rc<Mutex<SimpleCounter>>,
+}
 
 impl From<SimpleCounter> for MutexCounterWrapper {
     fn from(simple_counter: SimpleCounter) -> Self {
-        Self(Rc::new(Mutex::new(simple_counter)))
+        Self {
+            simple_counter: Rc::new(Mutex::new(simple_counter)),
+        }
     }
 }
 
 impl Counter for MutexCounterWrapper {
     fn increment(&self) {
-        self.0.lock().unwrap().increment()
+        self.simple_counter.lock().unwrap().increment()
     }
 
     fn get_value(&self) -> i32 {
-        self.0.lock().unwrap().get_value()
+        self.simple_counter.lock().unwrap().get_value()
     }
 }
 
 #[derive(Clone)]
-pub struct PostDbWrapper(Arc<Mutex<DieselPostDb>>);
+pub struct AsyncPostDbWrapper {
+    post_db: DieselPostDb,
+}
 
-impl From<DieselPostDb> for PostDbWrapper {
+impl From<DieselPostDb> for AsyncPostDbWrapper {
     fn from(post_db: DieselPostDb) -> Self {
-        PostDbWrapper(Arc::new(Mutex::new(post_db)))
+        AsyncPostDbWrapper { post_db }
     }
 }
 
-impl PostDb for PostDbWrapper {
-    fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
-        self.0
-            .lock()
-            .map(|post_db| {
-                post_db
-                    .get_posts()
-                    .map(|posts| posts.iter().map(|post| db_post_to_app_post(post)).collect())
-                    .map_err(|_| AppError {})
+#[async_trait]
+impl AsyncPostDb for AsyncPostDbWrapper {
+    async fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
+        self.post_db
+            .get_posts()
+            .map(|posts| {
+                posts
+                    .iter()
+                    .map(|post| db_post_to_app_post(post))
+                    .collect::<Vec<AppPost>>()
             })
-            .map_err(|_| AppError {})?
+            .map_err(|_| AppError {})
     }
 
     fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
-        self.0
-            .lock()
-            .map(|post_db| {
-                post_db
-                    .insert_post(title, body)
-                    .map(|post| db_post_to_app_post(&post))
-                    .map_err(|_| AppError {})
+        self.post_db
+            .insert_post(title, body)
+            .map(|post| db_post_to_app_post(&post))
+            .map_err(|_| AppError {})
+    }
+}
+
+#[derive(Clone)]
+pub struct PostDbWrapper {
+    post_db: DieselPostDb,
+}
+
+impl From<DieselPostDb> for PostDbWrapper {
+    fn from(post_db: DieselPostDb) -> Self {
+        PostDbWrapper { post_db }
+    }
+}
+
+#[async_trait]
+impl PostDb for PostDbWrapper {
+    fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
+        self.post_db
+            .get_posts()
+            .map(|posts| {
+                posts
+                    .iter()
+                    .map(|post| db_post_to_app_post(post))
+                    .collect::<Vec<AppPost>>()
             })
-            .map_err(|_| AppError {})?
+            .map_err(|_| AppError {})
+    }
+
+    fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
+        self.post_db
+            .insert_post(title, body)
+            .map(|post| db_post_to_app_post(&post))
+            .map_err(|_| AppError {})
     }
 }
 
@@ -115,20 +158,24 @@ fn db_post_to_app_post(db_post: &Post) -> AppPost {
 // Counter with Atomic
 
 #[derive(Clone)]
-pub struct AtomicCounterAdapter(Rc<AtomicCounter>);
+pub struct AtomicCounterAdapter {
+    atomic_counter: Rc<AtomicCounter>,
+}
 
 impl From<AtomicCounter> for AtomicCounterAdapter {
     fn from(atomic_counter: AtomicCounter) -> Self {
-        Self(Rc::new(atomic_counter))
+        Self {
+            atomic_counter: Rc::new(atomic_counter),
+        }
     }
 }
 
 impl Counter for AtomicCounterAdapter {
     fn increment(&self) {
-        self.0.increment()
+        self.atomic_counter.increment()
     }
 
     fn get_value(&self) -> i32 {
-        self.0.get_value()
+        self.atomic_counter.get_value()
     }
 }

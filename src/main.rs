@@ -3,6 +3,7 @@ mod application;
 mod atomic_counter;
 mod db;
 mod diesel_post_db;
+mod post_controller;
 mod println_logger;
 mod schema;
 mod service_registry;
