@@ -105,7 +105,11 @@ impl AsyncPostDb for AsyncPostDbWrapper {
             .map_err(|_| AppError {})
     }
 
-    fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
+    async fn create_post(
+        &self,
+        title: String,
+        body: String,
+    ) -> std::result::Result<AppPost, AppError> {
         self.post_db
             .insert_post(title, body)
             .map(|post| db_post_to_app_post(&post))

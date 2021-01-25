@@ -11,7 +11,7 @@ use warp::Reply;
 #[async_trait]
 pub trait AsyncPostDb {
     async fn get_posts(&self) -> Result<Vec<Post>, AppError>;
-    fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
+    async fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
 }
 
 #[derive(Clone)]
@@ -29,6 +29,14 @@ impl PostController {
             .get_posts()
             .await
             .map(|posts| warp::reply::json(&posts))
+            .map_err(|_| warp::reject::not_found())
+    }
+
+    pub async fn create_post(self) -> Result<impl Reply, Rejection> {
+        self.post_db
+            .create_post("title".to_owned(), "body".to_owned())
+            .await
+            .map(|p| warp::reply::json(&p))
             .map_err(|_| warp::reject::not_found())
     }
 }
