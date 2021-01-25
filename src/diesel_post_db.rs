@@ -4,6 +4,7 @@ use crate::schema::posts;
 
 use diesel::prelude::*;
 
+#[derive(Clone)]
 pub struct DieselPostDb {
     pg_connection_factory: PgConnectionFactory,
 }
