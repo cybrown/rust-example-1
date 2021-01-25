@@ -124,7 +124,6 @@ impl From<DieselPostDb> for PostDbWrapper {
     }
 }
 
-#[async_trait]
 impl PostDb for PostDbWrapper {
     fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
         self.post_db
