@@ -17,13 +17,14 @@ use crate::application::Logger;
 use crate::application::Uppercaser;
 use crate::post_controller::PostController;
 use crate::service_registry::ServiceRegistry;
+use std::sync::Arc;
 use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-    let sr = ServiceRegistry::new().unwrap();
-    let uppercaser = sr.get_uppercaser();
-    let logger = sr.get_logger("server".to_owned());
+    let sr = ServiceRegistry::new();
+    let uppercaser = Arc::new(sr.get_uppercaser());
+    let logger = Arc::new(sr.get_logger("server".to_owned()));
     let post_controller1 = sr.get_post_controller();
     let post_controller2 = sr.get_post_controller();
 

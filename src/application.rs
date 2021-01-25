@@ -1,6 +1,7 @@
 use mockall::predicate::*;
 use mockall::*;
 use serde::Serialize;
+use std::rc::Rc;
 
 // Expected interface for a logger
 #[automock]
@@ -48,7 +49,7 @@ impl From<diesel::result::Error> for AppError {
 pub struct Application<U: Uppercaser, L: Logger, P: PostDb> {
     uppercaser: U,
     logger: L,
-    counter: Box<dyn Counter>,
+    counter: Rc<dyn Counter>,
     post_db: P,
 }
 
@@ -74,7 +75,7 @@ impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
     }
 
     // Injection through constructor
-    pub fn new(uppercaser: U, logger: L, counter: Box<dyn Counter>, post_db: P) -> Self {
+    pub fn new(uppercaser: U, logger: L, counter: Rc<dyn Counter>, post_db: P) -> Self {
         Self {
             uppercaser,
             logger,
@@ -104,10 +105,10 @@ mod tests {
                 logger
             },
             {
-                let mut mock = Box::new(MockCounter::new());
+                let mut mock = MockCounter::new();
                 mock.expect_increment().times(1).return_const(());
                 mock.expect_get_value().times(0);
-                mock
+                Rc::new(mock)
             },
             {
                 let mut mock = MockPostDb::new();

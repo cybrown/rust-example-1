@@ -9,23 +9,20 @@ use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
 use async_trait::async_trait;
-use std::rc::Rc;
-use std::sync::Arc;
 use std::sync::Mutex;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
 // Logger
 
-#[derive(Clone)]
 pub struct LoggerAdapter {
-    println_logger: Arc<PrintlnLogger>,
+    println_logger: PrintlnLogger,
 }
 
 impl From<PrintlnLogger> for LoggerAdapter {
     fn from(println_logger: PrintlnLogger) -> Self {
         Self {
-            println_logger: Arc::new(println_logger),
+            println_logger: println_logger,
         }
     }
 }
@@ -38,7 +35,6 @@ impl Logger for LoggerAdapter {
 
 // Uppercaser
 
-#[derive(Copy, Clone)]
 pub struct UppercaserAdapter {
     uppercaser: Uppercaser,
 }
@@ -57,15 +53,14 @@ impl AppUppercaser for UppercaserAdapter {
 
 // Counter with Mutex
 
-#[derive(Clone)]
 pub struct MutexCounterWrapper {
-    simple_counter: Rc<Mutex<SimpleCounter>>,
+    simple_counter: Mutex<SimpleCounter>,
 }
 
 impl From<SimpleCounter> for MutexCounterWrapper {
     fn from(simple_counter: SimpleCounter) -> Self {
         Self {
-            simple_counter: Rc::new(Mutex::new(simple_counter)),
+            simple_counter: Mutex::new(simple_counter),
         }
     }
 }
@@ -80,7 +75,6 @@ impl Counter for MutexCounterWrapper {
     }
 }
 
-#[derive(Clone)]
 pub struct AsyncPostDbWrapper {
     post_db: DieselPostDb,
 }
@@ -117,7 +111,6 @@ impl AsyncPostDb for AsyncPostDbWrapper {
     }
 }
 
-#[derive(Clone)]
 pub struct PostDbWrapper {
     post_db: DieselPostDb,
 }
@@ -160,15 +153,14 @@ fn db_post_to_app_post(db_post: &Post) -> AppPost {
 
 // Counter with Atomic
 
-#[derive(Clone)]
 pub struct AtomicCounterAdapter {
-    atomic_counter: Rc<AtomicCounter>,
+    atomic_counter: AtomicCounter,
 }
 
 impl From<AtomicCounter> for AtomicCounterAdapter {
     fn from(atomic_counter: AtomicCounter) -> Self {
         Self {
-            atomic_counter: Rc::new(atomic_counter),
+            atomic_counter: atomic_counter,
         }
     }
 }

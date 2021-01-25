@@ -2,21 +2,13 @@ use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
 
-#[derive(Clone)]
 pub struct PgConnectionFactory {
     pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl PgConnectionFactory {
-    pub fn new() -> Result<Self, DbError> {
-        Ok(Self {
-            pool: Pool::builder()
-                .max_size(8)
-                .build(ConnectionManager::<PgConnection>::new(
-                    "postgres://postgres@localhost/postgres",
-                ))
-                .map_err(|_| DbError)?,
-        })
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
     }
 
     pub fn get_connection(
