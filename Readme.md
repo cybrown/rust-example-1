@@ -26,7 +26,7 @@ stateless services in multiple consumers.
 * [ ] Try anyhow
 * [ ] Try thiserror
 * [ ] Enrich errors with origin
-* [ ] Enrich errors with a message
+* [x] Enrich errors with a message
 
 ### Logging
 * [ ] Add logs
@@ -37,6 +37,7 @@ stateless services in multiple consumers.
 * [x] Run at least one data update query with diesel
 * [ ] Transactions
 * [x] Run sql queries in a seperate thread pool
+* [ ] Try sqlx
 
 ### HTTP Server
 * [x] Setup a web framework to return json
