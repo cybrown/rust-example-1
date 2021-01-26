@@ -31,13 +31,18 @@ stateless services in multiple consumers.
 ### Logging
 * [ ] Add logs
 
-### Database
+### Database (diesel)
 * [x] Setup diesel
 * [x] Run at least one data query with diesel
 * [x] Run at least one data update query with diesel
 * [ ] Transactions
-* [x] Run sql queries in a seperate thread pool
-* [ ] Try sqlx
+* [x] Run sql queries in dedicated threads for blocking apis
+
+### Database (sqlx)
+* [ ] Setup sqlx
+* [ ] Run at least one data query with sqlx
+* [ ] Run at least one data update query with sqlx
+* [ ] Transactions
 
 ### HTTP Server
 * [x] Setup a web framework to return json
