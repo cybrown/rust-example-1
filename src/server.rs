@@ -18,8 +18,19 @@ use crate::application::Logger;
 use crate::application::Uppercaser;
 use crate::post_controller::PostController;
 use crate::service_registry::ServiceRegistry;
+use std::convert::Infallible;
 use std::sync::Arc;
 use warp::Filter;
+use warp::Rejection;
+use warp::Reply;
+
+async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
+    dbg!(err);
+    Ok(warp::reply::with_status(
+        warp::reply(),
+        warp::http::StatusCode::INTERNAL_SERVER_ERROR,
+    ))
+}
 
 #[tokio::main]
 async fn main() {
@@ -45,7 +56,12 @@ async fn main() {
         .and(warp::filters::method::post())
         .and_then(PostController::create_post);
 
-    warp::serve(hello.or(get_posts).or(create_post))
-        .run(([127, 0, 0, 1], 3030))
-        .await;
+    warp::serve(
+        hello
+            .or(get_posts)
+            .or(create_post)
+            .recover(handle_rejection),
+    )
+    .run(([127, 0, 0, 1], 3030))
+    .await;
 }

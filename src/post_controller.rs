@@ -31,7 +31,7 @@ impl PostController {
             .get_posts()
             .await
             .map(|posts| warp::reply::json(&posts))
-            .map_err(|_| warp::reject::not_found())
+            .map_err(|err| warp::reject::custom(err))
     }
 
     pub async fn create_post(self) -> Result<impl Reply, Rejection> {
@@ -39,6 +39,8 @@ impl PostController {
             .create_post("title".to_owned(), "body".to_owned())
             .await
             .map(|p| warp::reply::json(&p))
-            .map_err(|_| warp::reject::not_found())
+            .map_err(|err| warp::reject::custom(err))
     }
 }
+
+impl warp::reject::Reject for AppError {}

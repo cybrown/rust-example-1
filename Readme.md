@@ -51,7 +51,9 @@ stateless services in multiple consumers.
 * [ ] Route to publish a post
 * [ ] Route to unpublish a post
 * [ ] Investigate open api v3
-* [ ] Return meaningfull errors
+* [ ] Return meaningfull errors for 4** status codes
+* [x] Return 500 on internal errors
+* [ ] Return a request id in a header
 
 ### Command line arguments
 
