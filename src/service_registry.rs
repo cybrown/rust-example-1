@@ -64,7 +64,9 @@ impl ServiceRegistry {
     }
 
     pub fn get_async_post_db(&self) -> impl AsyncPostDb {
-        AsyncPostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
+        AsyncPostDbWrapper::new(PostDbWrapper::from(DieselPostDb::new(
+            self.get_pg_connection_factory(),
+        )))
     }
 
     pub fn get_application(&self) -> Application<impl AppUppercaser, impl Logger, impl PostDb> {

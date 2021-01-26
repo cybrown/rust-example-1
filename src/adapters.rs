@@ -8,9 +8,9 @@ use crate::post_controller::AsyncPostDb;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
+use crate::util::spawn_blocking;
 use async_trait::async_trait;
 use std::sync::Mutex;
-use tokio::task;
 
 // Adapters to conform the external services to the expected interfaces by the application
 
@@ -77,11 +77,11 @@ impl Counter for MutexCounterWrapper {
 }
 
 pub struct AsyncPostDbWrapper {
-    post_db: DieselPostDb,
+    post_db: PostDbWrapper,
 }
 
-impl From<DieselPostDb> for AsyncPostDbWrapper {
-    fn from(post_db: DieselPostDb) -> Self {
+impl AsyncPostDbWrapper {
+    pub fn new(post_db: PostDbWrapper) -> Self {
         AsyncPostDbWrapper { post_db }
     }
 }
@@ -90,19 +90,7 @@ impl From<DieselPostDb> for AsyncPostDbWrapper {
 impl AsyncPostDb for AsyncPostDbWrapper {
     async fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
         let post_db = self.post_db.clone();
-        task::spawn_blocking(move || {
-            post_db
-                .get_posts()
-                .map(|posts| {
-                    posts
-                        .iter()
-                        .map(|post| db_post_to_app_post(post))
-                        .collect::<Vec<AppPost>>()
-                })
-                .map_err(|_| AppError {})
-        })
-        .await
-        .map_err(|_| AppError {})?
+        spawn_blocking(move || post_db.get_posts()).await
     }
 
     async fn create_post(
@@ -111,17 +99,11 @@ impl AsyncPostDb for AsyncPostDbWrapper {
         body: String,
     ) -> std::result::Result<AppPost, AppError> {
         let post_db = self.post_db.clone();
-        task::spawn_blocking(move || {
-            post_db
-                .insert_post(title, body)
-                .map(|post| db_post_to_app_post(&post))
-                .map_err(|_| AppError {})
-        })
-        .await
-        .map_err(|_| AppError {})?
+        spawn_blocking(move || post_db.create_post(title, body)).await
     }
 }
 
+#[derive(Clone)]
 pub struct PostDbWrapper {
     post_db: DieselPostDb,
 }
@@ -142,14 +124,14 @@ impl PostDb for PostDbWrapper {
                     .map(|post| db_post_to_app_post(post))
                     .collect::<Vec<AppPost>>()
             })
-            .map_err(|_| AppError {})
+            .map_err(|_| AppError::new("failed to get posts".to_owned()))
     }
 
     fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
         self.post_db
             .insert_post(title, body)
             .map(|post| db_post_to_app_post(&post))
-            .map_err(|_| AppError {})
+            .map_err(|_| AppError::new("failed to create post".to_owned()))
     }
 }
 

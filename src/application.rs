@@ -37,11 +37,19 @@ pub trait PostDb {
 }
 
 #[derive(Debug)]
-pub struct AppError;
+pub struct AppError {
+    message: String,
+}
+
+impl AppError {
+    pub fn new(message: String) -> Self {
+        Self { message }
+    }
+}
 
 impl From<diesel::result::Error> for AppError {
     fn from(_: diesel::result::Error) -> Self {
-        Self {}
+        Self::new("database error".to_owned())
     }
 }
 
