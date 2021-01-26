@@ -7,6 +7,8 @@ stateless services in multiple consumers.
 
 ### Dependency injection
 * [x] Create services and wire them together
+* [x] Use injection through generic
+* [x] Use injection through dyn Trait
 * [x] Each services can be injected in many consumers
 * [x] Each services can hold a mutable state
 * [x] Service consumers must expose a trait
@@ -23,21 +25,27 @@ stateless services in multiple consumers.
 * [x] Seperate error between services and consumers
 * [ ] Try anyhow
 * [ ] Try thiserror
+* [ ] Enrich errors with origin
+* [ ] Enrich errors with a message
+
+### Logging
+* [ ] Add logs
 
 ### Database
 * [x] Setup diesel
 * [x] Run at least one data query with diesel
 * [x] Run at least one data update query with diesel
 * [ ] Transactions
-* [ ] Run sql queries in a thread pool
+* [x] Run sql queries in a seperate thread pool
 
 ### HTTP Server
-* [ ] Setup a web framework to return json
-* [ ] Route to get all posts
-* [ ] Route to create a post
+* [x] Setup a web framework to return json
+* [x] Route to get all posts
+* [x] Route to create a post
 * [ ] Route to publish a post
 * [ ] Route to unpublish a post
 * [ ] Investigate open api v3
+* [ ] Return meaningfull errors
 
 ### Command line arguments
 
