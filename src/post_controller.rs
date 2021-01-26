@@ -20,8 +20,10 @@ pub struct PostController {
 }
 
 impl PostController {
-    pub fn new(post_db: Arc<dyn AsyncPostDb + Send + Sync>) -> Self {
-        Self { post_db }
+    pub fn new(post_db: Box<dyn AsyncPostDb + Send + Sync>) -> Self {
+        Self {
+            post_db: Arc::from(post_db),
+        }
     }
 
     pub async fn get_posts(self) -> Result<impl Reply, Rejection> {

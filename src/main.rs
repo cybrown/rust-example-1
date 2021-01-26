@@ -9,7 +9,6 @@ mod schema;
 mod service_registry;
 mod simple_counter;
 mod uppercaser;
-mod utils;
 
 #[macro_use]
 extern crate diesel;

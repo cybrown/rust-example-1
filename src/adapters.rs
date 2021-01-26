@@ -8,7 +8,6 @@ use crate::post_controller::AsyncPostDb;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
-use crate::utils::flatten;
 use async_trait::async_trait;
 use std::sync::Mutex;
 use tokio::task;
@@ -91,21 +90,19 @@ impl From<DieselPostDb> for AsyncPostDbWrapper {
 impl AsyncPostDb for AsyncPostDbWrapper {
     async fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
         let post_db = self.post_db.clone();
-        flatten(
-            task::spawn_blocking(move || {
-                post_db
-                    .get_posts()
-                    .map(|posts| {
-                        posts
-                            .iter()
-                            .map(|post| db_post_to_app_post(post))
-                            .collect::<Vec<AppPost>>()
-                    })
-                    .map_err(|_| AppError {})
-            })
-            .await
-            .map_err(|_| AppError {}),
-        )
+        task::spawn_blocking(move || {
+            post_db
+                .get_posts()
+                .map(|posts| {
+                    posts
+                        .iter()
+                        .map(|post| db_post_to_app_post(post))
+                        .collect::<Vec<AppPost>>()
+                })
+                .map_err(|_| AppError {})
+        })
+        .await
+        .map_err(|_| AppError {})?
     }
 
     async fn create_post(
@@ -114,16 +111,14 @@ impl AsyncPostDb for AsyncPostDbWrapper {
         body: String,
     ) -> std::result::Result<AppPost, AppError> {
         let post_db = self.post_db.clone();
-        flatten(
-            task::spawn_blocking(move || {
-                post_db
-                    .insert_post(title, body)
-                    .map(|post| db_post_to_app_post(&post))
-                    .map_err(|_| AppError {})
-            })
-            .await
-            .map_err(|_| AppError {}),
-        )
+        task::spawn_blocking(move || {
+            post_db
+                .insert_post(title, body)
+                .map(|post| db_post_to_app_post(&post))
+                .map_err(|_| AppError {})
+        })
+        .await
+        .map_err(|_| AppError {})?
     }
 }
 

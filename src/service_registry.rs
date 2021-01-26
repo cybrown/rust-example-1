@@ -21,7 +21,6 @@ use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
 use std::rc::Rc;
-use std::sync::Arc;
 
 pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
@@ -86,6 +85,6 @@ impl ServiceRegistry {
     }
 
     pub fn get_post_controller(&self) -> PostController {
-        PostController::new(Arc::new(self.get_async_post_db()))
+        PostController::new(Box::new(self.get_async_post_db()))
     }
 }
