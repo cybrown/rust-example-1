@@ -21,6 +21,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
 use std::rc::Rc;
+use std::time::Duration;
 
 pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
@@ -30,16 +31,19 @@ pub struct ServiceRegistry {
 
 impl ServiceRegistry {
     pub fn new() -> Self {
-        Self {
-            atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
-            mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
-            pool: Pool::builder()
-                .max_size(8)
-                .build(ConnectionManager::<PgConnection>::new(
-                    "postgres://postgres@localhost/postgres",
-                ))
-                .expect("toto"),
-        }
+        Pool::builder()
+            .min_idle(Some(0))
+            .max_size(16)
+            .idle_timeout(Some(Duration::from_secs(60)))
+            .build(ConnectionManager::<PgConnection>::new(
+                "postgres://postgres@localhost/postgres",
+            ))
+            .map(|pool| Self {
+                atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
+                mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
+                pool,
+            })
+            .expect("failed to create connexion pool")
     }
 
     pub fn get_logger(&self, prefix: String) -> impl Logger {

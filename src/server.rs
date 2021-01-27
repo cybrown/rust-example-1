@@ -20,9 +20,11 @@ use crate::post_controller::PostController;
 use crate::service_registry::ServiceRegistry;
 use std::convert::Infallible;
 use std::sync::Arc;
-use warp::Filter;
-use warp::Rejection;
-use warp::Reply;
+use warp::get;
+use warp::path;
+use warp::post;
+use warp::serve;
+use warp::{Filter, Rejection, Reply};
 
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
     dbg!(err);
@@ -41,27 +43,24 @@ async fn main() {
     let post_controller2 = sr.get_post_controller();
 
     // GET /hello/warp => 200 OK with body "Hello, warp!"
-    let hello = warp::path!("hello" / String).map(move |name| {
+    let hello = path!("hello" / String).map(move |name| {
         logger.log("Incoming request".to_owned());
         format!("Hello, {}!", uppercaser.to_uppercase(name))
     });
 
-    let get_posts = warp::path!("posts")
+    let get_posts = get()
         .map(move || post_controller1.clone())
-        .and(warp::filters::method::get())
         .and_then(PostController::get_posts);
 
-    let create_post = warp::path!("posts")
+    let create_post = post()
         .map(move || post_controller2.clone())
-        .and(warp::filters::method::post())
         .and_then(PostController::create_post);
 
-    warp::serve(
-        hello
-            .or(get_posts)
-            .or(create_post)
-            .recover(handle_rejection),
-    )
-    .run(([127, 0, 0, 1], 3030))
-    .await;
+    let posts_api = path!("posts").and(get_posts.or(create_post));
+
+    println!("Listening incoming connexions...");
+
+    serve(hello.or(posts_api).recover(handle_rejection))
+        .run(([127, 0, 0, 1], 3030))
+        .await;
 }
