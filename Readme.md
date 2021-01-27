@@ -21,6 +21,14 @@ stateless services in multiple consumers.
 * [ ] Generate a coverage report
 * [x] Inject mocks with spies to test wether a dependency was called
 
+### Continuous integration
+* [ ] Check formating
+* [ ] Run additional static analysis tools
+* [ ] Investigate how to get standard unit tests reports
+* [ ] Investigate how to get standard coverage reports for unit tests
+* [ ] Investigate how to get standard integration tests reports
+* [ ] Investigate how to get standard coverage reports for integration tests
+
 ### Error handling
 * [x] Seperate error between services and consumers
 * [ ] Try anyhow
