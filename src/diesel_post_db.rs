@@ -32,6 +32,10 @@ pub struct Post {
     pub published: bool,
 }
 
+pub struct GetPostsCriteria {
+    pub published: Option<bool>,
+}
+
 impl DieselPostDb {
     pub fn new(pg_connection_factory: PgConnectionFactory) -> Self {
         Self {
@@ -39,10 +43,12 @@ impl DieselPostDb {
         }
     }
 
-    pub fn get_posts(&self) -> Result<Vec<Post>, DbError> {
-        Ok(posts::dsl::posts
-            .filter(posts::dsl::published.eq(true))
-            .load::<Post>(&*self.pg_connection_factory.get_connection()?)?)
+    pub fn get_posts(&self, criteria: GetPostsCriteria) -> Result<Vec<Post>, DbError> {
+        let mut query = posts::dsl::posts.into_boxed();
+        if let Some(published) = criteria.published {
+            query = query.filter(posts::dsl::published.eq(published))
+        };
+        Ok(query.load::<Post>(&*self.pg_connection_factory.get_connection()?)?)
     }
 
     pub fn insert_post(&self, title: String, body: String) -> Result<Post, DbError> {

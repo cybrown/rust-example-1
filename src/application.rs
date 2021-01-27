@@ -32,7 +32,7 @@ pub struct Post {
 
 #[automock]
 pub trait PostDb {
-    fn get_posts(&self) -> Result<Vec<Post>, AppError>;
+    fn get_posts(&self, show_all: bool) -> Result<Vec<Post>, AppError>;
     fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
 }
 
@@ -70,7 +70,7 @@ impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
         let c = self.uppercaser.to_uppercase(k);
         println!("Hello: {}", c);
         self.post_db
-            .get_posts()
+            .get_posts(false)
             .map(|posts| {
                 for post in posts {
                     println!("Post: {}", post.title);
@@ -120,7 +120,7 @@ mod tests {
             },
             {
                 let mut mock = MockPostDb::new();
-                mock.expect_get_posts().returning(|| Ok(vec![]));
+                mock.expect_get_posts().returning(|_| Ok(vec![]));
                 mock.expect_create_post().returning(|_, _| {
                     Ok(Post {
                         id: 0,

@@ -50,6 +50,7 @@ async fn main() {
 
     let get_posts = get()
         .map(move || post_controller1.clone())
+        .and(warp::query())
         .and_then(PostController::get_posts);
 
     let create_post = post()

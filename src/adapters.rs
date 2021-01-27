@@ -3,6 +3,7 @@ use crate::application::PostDb;
 use crate::application::{Counter, Logger, Post as AppPost, Uppercaser as AppUppercaser};
 use crate::atomic_counter::AtomicCounter;
 use crate::diesel_post_db::DieselPostDb;
+use crate::diesel_post_db::GetPostsCriteria;
 use crate::diesel_post_db::Post;
 use crate::post_controller::AsyncPostDb;
 use crate::println_logger::PrintlnLogger;
@@ -88,9 +89,9 @@ impl AsyncPostDbWrapper {
 
 #[async_trait]
 impl AsyncPostDb for AsyncPostDbWrapper {
-    async fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
+    async fn get_posts(&self, show_all: bool) -> Result<Vec<AppPost>, AppError> {
         let post_db = self.post_db.clone();
-        spawn_blocking(move || post_db.get_posts()).await
+        spawn_blocking(move || post_db.get_posts(show_all)).await
     }
 
     async fn create_post(
@@ -115,9 +116,11 @@ impl From<DieselPostDb> for PostDbWrapper {
 }
 
 impl PostDb for PostDbWrapper {
-    fn get_posts(&self) -> Result<Vec<AppPost>, AppError> {
+    fn get_posts(&self, show_all: bool) -> Result<Vec<AppPost>, AppError> {
         self.post_db
-            .get_posts()
+            .get_posts(GetPostsCriteria {
+                published: if show_all { None } else { Some(true) },
+            })
             .map(|posts| {
                 posts
                     .iter()

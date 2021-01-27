@@ -3,6 +3,7 @@ use crate::application::Post;
 use async_trait::async_trait;
 use mockall::predicate::*;
 use mockall::*;
+use serde::Deserialize;
 use std::sync::Arc;
 use warp::Rejection;
 use warp::Reply;
@@ -10,13 +11,18 @@ use warp::Reply;
 #[automock]
 #[async_trait]
 pub trait AsyncPostDb {
-    async fn get_posts(&self) -> Result<Vec<Post>, AppError>;
+    async fn get_posts(&self, show_all: bool) -> Result<Vec<Post>, AppError>;
     async fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
 }
 
 #[derive(Clone)]
 pub struct PostController {
     post_db: Arc<dyn AsyncPostDb + Send + Sync>,
+}
+
+#[derive(Deserialize, Debug, Copy, Clone)]
+pub struct QueryParameters {
+    showAll: Option<bool>,
 }
 
 impl PostController {
@@ -26,9 +32,13 @@ impl PostController {
         }
     }
 
-    pub async fn get_posts(self) -> Result<impl Reply, Rejection> {
+    pub async fn get_posts(self, query: QueryParameters) -> Result<impl Reply, Rejection> {
+        let show_all = match query.showAll {
+            Some(a) => a,
+            _ => false,
+        };
         self.post_db
-            .get_posts()
+            .get_posts(show_all)
             .await
             .map(|posts| warp::reply::json(&posts))
             .map_err(|err| warp::reject::custom(err))
