@@ -23,7 +23,7 @@ pub struct PostController {
 
 #[derive(Deserialize, Debug, Copy, Clone)]
 pub struct QueryParameters {
-    showAll: Option<bool>,
+    show_all: Option<bool>,
 }
 
 impl PostController {
@@ -34,7 +34,7 @@ impl PostController {
     }
 
     pub async fn get_posts(self, query: QueryParameters) -> Result<impl Reply, Rejection> {
-        let show_all = match query.showAll {
+        let show_all = match query.show_all {
             Some(a) => a,
             _ => false,
         };

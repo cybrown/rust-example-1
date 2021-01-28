@@ -1,19 +1,3 @@
-mod adapters;
-mod application;
-mod atomic_counter;
-mod db;
-mod diesel_post_db;
-mod post_controller;
-mod println_logger;
-mod schema;
-mod service_registry;
-mod simple_counter;
-mod uppercaser;
-mod util;
-
-#[macro_use]
-extern crate diesel;
-
 use crate::application::Logger;
 use crate::application::Uppercaser;
 use crate::post_controller::PostController;
@@ -34,8 +18,7 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
     ))
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn run_server() {
     let sr = ServiceRegistry::new();
     let uppercaser = Arc::new(sr.get_uppercaser());
     let logger = Arc::new(sr.get_logger("server".to_owned()));
