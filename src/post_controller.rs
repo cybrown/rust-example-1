@@ -1,4 +1,5 @@
 use crate::application::AppError;
+use crate::application::AppResult;
 use crate::application::Post;
 use async_trait::async_trait;
 use mockall::predicate::*;
@@ -11,8 +12,8 @@ use warp::Reply;
 #[automock]
 #[async_trait]
 pub trait AsyncPostDb {
-    async fn get_posts(&self, show_all: bool) -> Result<Vec<Post>, AppError>;
-    async fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
+    async fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
+    async fn create_post(&self, title: String, body: String) -> AppResult<Post>;
 }
 
 #[derive(Clone)]

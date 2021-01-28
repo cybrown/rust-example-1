@@ -1,4 +1,5 @@
 use crate::application::AppError;
+use crate::application::AppResult;
 use crate::application::PostDb;
 use crate::application::{Counter, Logger, Post as AppPost, Uppercaser as AppUppercaser};
 use crate::atomic_counter::AtomicCounter;
@@ -89,16 +90,12 @@ impl AsyncPostDbWrapper {
 
 #[async_trait]
 impl AsyncPostDb for AsyncPostDbWrapper {
-    async fn get_posts(&self, show_all: bool) -> Result<Vec<AppPost>, AppError> {
+    async fn get_posts(&self, show_all: bool) -> AppResult<Vec<AppPost>> {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.get_posts(show_all)).await
     }
 
-    async fn create_post(
-        &self,
-        title: String,
-        body: String,
-    ) -> std::result::Result<AppPost, AppError> {
+    async fn create_post(&self, title: String, body: String) -> AppResult<AppPost> {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.create_post(title, body)).await
     }
@@ -116,7 +113,7 @@ impl From<DieselPostDb> for PostDbWrapper {
 }
 
 impl PostDb for PostDbWrapper {
-    fn get_posts(&self, show_all: bool) -> Result<Vec<AppPost>, AppError> {
+    fn get_posts(&self, show_all: bool) -> AppResult<Vec<AppPost>> {
         self.post_db
             .get_posts(GetPostsCriteria {
                 published: if show_all { None } else { Some(true) },
@@ -130,7 +127,7 @@ impl PostDb for PostDbWrapper {
             .map_err(|_| AppError::new("failed to get posts".to_owned()))
     }
 
-    fn create_post(&self, title: String, body: String) -> std::result::Result<AppPost, AppError> {
+    fn create_post(&self, title: String, body: String) -> AppResult<AppPost> {
         self.post_db
             .insert_post(title, body)
             .map(|post| db_post_to_app_post(&post))

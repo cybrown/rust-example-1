@@ -1,9 +1,10 @@
 use crate::application::AppError;
+use crate::application::AppResult;
 use tokio::task;
 
-pub async fn spawn_blocking<F, R>(f: F) -> Result<R, AppError>
+pub async fn spawn_blocking<F, R>(f: F) -> AppResult<R>
 where
-    F: FnOnce() -> Result<R, AppError> + Send + 'static,
+    F: FnOnce() -> AppResult<R> + Send + 'static,
     R: Send + 'static,
 {
     task::spawn_blocking(f)

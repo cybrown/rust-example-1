@@ -32,14 +32,16 @@ pub struct Post {
 
 #[automock]
 pub trait PostDb {
-    fn get_posts(&self, show_all: bool) -> Result<Vec<Post>, AppError>;
-    fn create_post(&self, title: String, body: String) -> Result<Post, AppError>;
+    fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
+    fn create_post(&self, title: String, body: String) -> AppResult<Post>;
 }
 
 #[derive(Debug)]
 pub struct AppError {
     message: String,
 }
+
+pub type AppResult<T> = Result<T, AppError>;
 
 impl AppError {
     pub fn new(message: String) -> Self {
