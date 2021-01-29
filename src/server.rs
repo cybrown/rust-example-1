@@ -20,38 +20,42 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
 }
 
 pub async fn run_server() {
-    let sr = ServiceRegistry::new();
-    let uppercaser = Arc::new(sr.get_uppercaser());
-    let logger = Arc::new(sr.get_logger("server".to_owned()));
+    let service_registry = ServiceRegistry::new();
 
-    // GET /hello/warp => 200 OK with body "Hello, warp!"
-    let hello = path!("hello" / String).map(move |name| {
-        logger.log("Incoming request".to_owned());
-        format!("Hello, {}!", uppercaser.to_uppercase(name))
-    });
+    let hello = {
+        let uppercaser = Arc::new(service_registry.get_uppercaser());
+        let logger = Arc::new(service_registry.get_logger("server".to_owned()));
 
-    let post_controller = sr.get_post_controller();
-    let with_post_controller = warp::any().map(move || post_controller.clone());
+        path!("hello" / String).map(move |name| {
+            logger.log("Incoming request".to_owned());
+            format!("Hello, {}!", uppercaser.to_uppercase(name))
+        })
+    };
 
-    let get_posts = with_post_controller
-        .clone()
-        .and(get())
-        .and(warp::path::end())
-        .and(warp::query())
-        .and_then(PostController::get_posts);
+    let posts_api = {
+        let with_post_controller = {
+            let post_controller = service_registry.get_post_controller();
+            warp::any().map(move || post_controller.clone())
+        };
 
-    let create_post = with_post_controller
-        .clone()
-        .and(post())
-        .and(warp::path::end())
-        .and_then(PostController::create_post);
+        let get_posts = get()
+            .and(with_post_controller.clone())
+            .and(warp::path::end())
+            .and(warp::query())
+            .and_then(PostController::get_posts);
 
-    let publish_post = with_post_controller
-        .and(put())
-        .and(warp::path!(i32 / "published"))
-        .and_then(PostController::publish_post);
+        let create_post = post()
+            .and(with_post_controller.clone())
+            .and(warp::path::end())
+            .and_then(PostController::create_post);
 
-    let posts_api = warp::path("posts").and(get_posts.or(create_post).or(publish_post));
+        let publish_post = put()
+            .and(with_post_controller)
+            .and(warp::path!(i32 / "published"))
+            .and_then(PostController::publish_post);
+
+        warp::path("posts").and(get_posts.or(create_post).or(publish_post))
+    };
 
     println!("Listening incoming connexions...");
 
