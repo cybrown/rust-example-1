@@ -1,7 +1,40 @@
-# Rust example 1
+# Rust sample api
 
-Basic example to show how to inject shared dependencies of
-stateless services in multiple consumers.
+Example api project using Rust.
+
+## File architecture
+
+    /crates
+        Libraries that could be external dependencies
+
+    /migrations
+        sql schema to run with diesel-cli
+
+    /src
+        /adapters
+            Adapters wrapping external libraries to implement traits provided by the domain
+            Also converts internal dependencies such as database access
+
+        /api_warp
+            Api entry points calling the domain
+
+        /commands
+            Command line utilities calling the domain
+
+        /db_diesel
+            Database access for pg using diesel
+
+        /domain
+            Implementation of the business rules
+
+        /main.rs
+            Entry point of the application
+
+        /service_registry.rs
+            Factories to create the concrete types of many dependencies
+
+        /util.rs
+            Some utility functions
 
 ## Goals
 
@@ -22,8 +55,8 @@ stateless services in multiple consumers.
 * [x] Inject mocks with spies to test wether a dependency was called
 
 ### Project architecture
-* [ ] Split one project in multiple files
-* [ ] Split in multiple projects
+* [x] Split one project in multiple files
+* [x] Split in multiple projects
 * [ ] Use cargo workspaces
 
 ### Continuous integration
