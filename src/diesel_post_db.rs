@@ -58,11 +58,9 @@ impl DieselPostDb {
             .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)?)
     }
 
-    pub fn update_post(&self, values: UpdatePost) -> Result<Post, DbError> {
-        Ok(
-            diesel::update(posts::table.filter(posts::dsl::published.eq(true)))
-                .set(values)
-                .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)?,
-        )
+    pub fn update_post(&self, post_id: i32, values: UpdatePost) -> Result<Post, DbError> {
+        Ok(diesel::update(posts::table.find(post_id))
+            .set(values)
+            .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)?)
     }
 }

@@ -6,7 +6,9 @@ use crate::atomic_counter::AtomicCounter;
 use crate::diesel_post_db::DieselPostDb;
 use crate::diesel_post_db::GetPostsCriteria;
 use crate::diesel_post_db::Post;
+use crate::diesel_post_db::UpdatePost;
 use crate::post_controller::AsyncPostDb;
+use crate::post_controller::PostUpdates;
 use crate::println_logger::PrintlnLogger;
 use crate::simple_counter::SimpleCounter;
 use crate::uppercaser::Uppercaser;
@@ -99,11 +101,32 @@ impl AsyncPostDb for AsyncPostDbWrapper {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.create_post(title, body)).await
     }
+
+    async fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<AppPost> {
+        let post_db = self.post_db.clone();
+        spawn_blocking(move || post_db.update_post(post_id, updates)).await
+    }
 }
 
 #[derive(Clone)]
 pub struct PostDbWrapper {
     post_db: DieselPostDb,
+}
+
+impl PostDbWrapper {
+    fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<AppPost> {
+        self.post_db
+            .update_post(
+                post_id,
+                UpdatePost {
+                    body: None,
+                    title: None,
+                    published: updates.published,
+                },
+            )
+            .map(|post| db_post_to_app_post(&post))
+            .map_err(|_| AppError::new("failed to get posts".to_owned()))
+    }
 }
 
 impl From<DieselPostDb> for PostDbWrapper {

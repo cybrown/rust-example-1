@@ -9,11 +9,16 @@ use std::sync::Arc;
 use warp::Rejection;
 use warp::Reply;
 
+pub struct PostUpdates {
+    pub published: Option<bool>,
+}
+
 #[automock]
 #[async_trait]
 pub trait AsyncPostDb {
     async fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
     async fn create_post(&self, title: String, body: String) -> AppResult<Post>;
+    async fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<Post>;
 }
 
 #[derive(Clone)]
@@ -48,6 +53,19 @@ impl PostController {
     pub async fn create_post(self) -> Result<impl Reply, Rejection> {
         self.post_db
             .create_post("title".to_owned(), "body".to_owned())
+            .await
+            .map(|p| warp::reply::json(&p))
+            .map_err(|err| warp::reject::custom(err))
+    }
+
+    pub async fn publish_post(self, post_id: i32) -> Result<impl Reply, Rejection> {
+        self.post_db
+            .update_post(
+                post_id,
+                PostUpdates {
+                    published: Some(true),
+                },
+            )
             .await
             .map(|p| warp::reply::json(&p))
             .map_err(|err| warp::reject::custom(err))
