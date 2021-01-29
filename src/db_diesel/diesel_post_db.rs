@@ -43,6 +43,14 @@ impl DieselPostDb {
         }
     }
 
+    pub fn get_post_by_id(&self, post_id: i32) -> Result<Option<Post>, DbError> {
+        posts::dsl::posts
+            .find(post_id)
+            .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)
+            .optional()
+            .map_err(|err| DbError::from(err))
+    }
+
     pub fn get_posts(&self, criteria: GetPostsCriteria) -> Result<Vec<Post>, DbError> {
         let mut query = posts::dsl::posts.into_boxed();
         if let Some(published) = criteria.published {
@@ -58,9 +66,11 @@ impl DieselPostDb {
             .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)?)
     }
 
-    pub fn update_post(&self, post_id: i32, values: UpdatePost) -> Result<Post, DbError> {
-        Ok(diesel::update(posts::table.find(post_id))
+    pub fn update_post(&self, post_id: i32, values: UpdatePost) -> Result<Option<Post>, DbError> {
+        diesel::update(posts::table.find(post_id))
             .set(values)
-            .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)?)
+            .get_result::<Post>(&*self.pg_connection_factory.get_connection()?)
+            .optional()
+            .map_err(|err| DbError::from(err))
     }
 }

@@ -18,6 +18,11 @@ impl<P: PostDb + Clone + Send + Sync + 'static> AsyncPostDbWrapper<P> {
 
 #[async_trait]
 impl<P: PostDb + Clone + Send + Sync + 'static> AsyncPostDb for AsyncPostDbWrapper<P> {
+    async fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<DomainPost>> {
+        let post_db = self.post_db.clone();
+        spawn_blocking(move || post_db.get_post_by_id(post_id)).await
+    }
+
     async fn get_posts(&self, show_all: bool) -> DomainResult<Vec<DomainPost>> {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.get_posts(show_all)).await
@@ -28,7 +33,11 @@ impl<P: PostDb + Clone + Send + Sync + 'static> AsyncPostDb for AsyncPostDbWrapp
         spawn_blocking(move || post_db.create_post(title, body)).await
     }
 
-    async fn update_post(&self, post_id: i32, updates: PostUpdates) -> DomainResult<DomainPost> {
+    async fn update_post(
+        &self,
+        post_id: i32,
+        updates: PostUpdates,
+    ) -> DomainResult<Option<DomainPost>> {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.update_post(post_id, updates)).await
     }

@@ -20,6 +20,13 @@ impl From<DieselPostDb> for PostDbWrapper {
 }
 
 impl PostDb for PostDbWrapper {
+    fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<DomainPost>> {
+        self.post_db
+            .get_post_by_id(post_id)
+            .map(|post| post.map(|post| db_post_to_app_post(&post)))
+            .map_err(|_| DomainError::new("failed to get post".to_owned()))
+    }
+
     fn get_posts(&self, show_all: bool) -> DomainResult<Vec<DomainPost>> {
         self.post_db
             .get_posts(GetPostsCriteria {
@@ -41,7 +48,7 @@ impl PostDb for PostDbWrapper {
             .map_err(|_| DomainError::new("failed to create post".to_owned()))
     }
 
-    fn update_post(&self, post_id: i32, updates: PostUpdates) -> DomainResult<DomainPost> {
+    fn update_post(&self, post_id: i32, updates: PostUpdates) -> DomainResult<Option<DomainPost>> {
         self.post_db
             .update_post(
                 post_id,
@@ -51,7 +58,7 @@ impl PostDb for PostDbWrapper {
                     published: updates.published,
                 },
             )
-            .map(|post| db_post_to_app_post(&post))
+            .map(|post| post.map(|post| db_post_to_app_post(&post)))
             .map_err(|_| DomainError::new("failed to get posts".to_owned()))
     }
 }
