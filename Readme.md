@@ -63,9 +63,11 @@ stateless services in multiple consumers.
 * [x] Return 500 on internal errors
 * [ ] Return a request id in a header
 
-### Command line arguments
-
-### Environment variables
+### Configuration
+* [ ] Environment variables
+* [ ] Read a configuration file in many formats
+* [ ] Read cli args
+* [ ] Use secrets from a cloud provider or vault
 
 ### HTTP Client
 
