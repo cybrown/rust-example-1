@@ -56,7 +56,7 @@ stateless services in multiple consumers.
 * [x] Setup a web framework to return json
 * [x] Route to get all posts
 * [x] Route to create a post
-* [ ] Route to publish a post
+* [x] Route to publish a post
 * [ ] Route to unpublish a post
 * [ ] Investigate open api v3
 * [ ] Return meaningfull errors for 4** status codes
