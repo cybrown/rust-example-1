@@ -1,3 +1,4 @@
+use crate::post_controller::PostUpdates;
 use mockall::predicate::*;
 use mockall::*;
 use serde::Serialize;
@@ -34,6 +35,7 @@ pub struct Post {
 pub trait PostDb {
     fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
     fn create_post(&self, title: String, body: String) -> AppResult<Post>;
+    fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<Post>;
 }
 
 #[derive(Debug)]

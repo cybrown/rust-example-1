@@ -80,18 +80,18 @@ impl Counter for MutexCounterWrapper {
     }
 }
 
-pub struct AsyncPostDbWrapper {
-    post_db: PostDbWrapper,
+pub struct AsyncPostDbWrapper<P: PostDb + Clone + Send + Sync + 'static> {
+    post_db: P,
 }
 
-impl AsyncPostDbWrapper {
-    pub fn new(post_db: PostDbWrapper) -> Self {
+impl<P: PostDb + Clone + Send + Sync + 'static> AsyncPostDbWrapper<P> {
+    pub fn new(post_db: P) -> Self {
         AsyncPostDbWrapper { post_db }
     }
 }
 
 #[async_trait]
-impl AsyncPostDb for AsyncPostDbWrapper {
+impl<P: PostDb + Clone + Send + Sync + 'static> AsyncPostDb for AsyncPostDbWrapper<P> {
     async fn get_posts(&self, show_all: bool) -> AppResult<Vec<AppPost>> {
         let post_db = self.post_db.clone();
         spawn_blocking(move || post_db.get_posts(show_all)).await
@@ -111,22 +111,6 @@ impl AsyncPostDb for AsyncPostDbWrapper {
 #[derive(Clone)]
 pub struct PostDbWrapper {
     post_db: DieselPostDb,
-}
-
-impl PostDbWrapper {
-    fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<AppPost> {
-        self.post_db
-            .update_post(
-                post_id,
-                UpdatePost {
-                    body: None,
-                    title: None,
-                    published: updates.published,
-                },
-            )
-            .map(|post| db_post_to_app_post(&post))
-            .map_err(|_| AppError::new("failed to get posts".to_owned()))
-    }
 }
 
 impl From<DieselPostDb> for PostDbWrapper {
@@ -155,6 +139,20 @@ impl PostDb for PostDbWrapper {
             .insert_post(title, body)
             .map(|post| db_post_to_app_post(&post))
             .map_err(|_| AppError::new("failed to create post".to_owned()))
+    }
+
+    fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<AppPost> {
+        self.post_db
+            .update_post(
+                post_id,
+                UpdatePost {
+                    body: None,
+                    title: None,
+                    published: updates.published,
+                },
+            )
+            .map(|post| db_post_to_app_post(&post))
+            .map_err(|_| AppError::new("failed to get posts".to_owned()))
     }
 }
 
