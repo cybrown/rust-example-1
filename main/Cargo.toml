@@ -1,0 +1,25 @@
+[package]
+name = "rust30"
+version = "0.1.0"
+authors = ["Cy Brown <cy.brown59@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+mockall = "0.9.0"
+diesel = { version = "1.4.5", features = ["postgres", "r2d2"] }
+tokio = { version = "1", features = ["full"] }
+warp = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+async-trait = "0.1.42"
+simple_counter = { path = "../simple_counter" }
+atomic_counter = { path = "../atomic_counter" }
+println_logger = { path = "../println_logger" }
+uppercaser = { path = "../uppercaser" }
+domain = { path = "../domain" }
+
+[[bin]]
+name = "rust30"
+path = "src/main.rs"

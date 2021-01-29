@@ -4,16 +4,13 @@ Example api project using Rust.
 
 ## File architecture
 
-    /crates
-        Libraries that could be external dependencies
-
-        /domain
-            Special crate that provides all the business rules and provides all the expected traits
-
     /migrations
         sql schema to run with diesel-cli
 
-    /src
+    /domain
+        Implementation of the business rules
+
+    /main
         /adapters
             Adapters wrapping external libraries to implement traits provided by the domain
             Also converts internal dependencies such as database access
@@ -27,9 +24,6 @@ Example api project using Rust.
         /db_diesel
             Database access for pg using diesel
 
-        /domain
-            Implementation of the business rules
-
         /main.rs
             Entry point of the application
 
@@ -38,6 +32,19 @@ Example api project using Rust.
 
         /util.rs
             Some utility functions
+
+    /atomic_counter
+        A simple thread safe counter
+
+    /println_logger
+        A simple logger based on println!
+
+    /simple_counter
+        A counter which is not thread safe.
+        Used to illustrate how to use an adapter with an Arc and a Mutex
+
+    /uppercaser
+        A simple stateless library
 
 ## Goals
 
@@ -60,7 +67,7 @@ Example api project using Rust.
 ### Project architecture
 * [x] Split one project in multiple files
 * [x] Split in multiple projects
-* [ ] Use cargo workspaces
+* [x] Use cargo workspaces
 
 ### Continuous integration
 * [ ] Check formating
