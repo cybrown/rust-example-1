@@ -21,6 +21,11 @@ stateless services in multiple consumers.
 * [ ] Generate a coverage report
 * [x] Inject mocks with spies to test wether a dependency was called
 
+### Project architecture
+* [ ] Split one project in multiple files
+* [ ] Split in multiple projects
+* [ ] Use cargo workspaces
+
 ### Continuous integration
 * [ ] Check formating
 * [ ] Run additional static analysis tools

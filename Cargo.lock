@@ -42,6 +42,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "atomic_counter"
+version = "0.1.0"
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -800,6 +804,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "println_logger"
+version = "0.1.0"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -962,11 +970,15 @@ name = "rust30"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "atomic_counter",
  "diesel",
  "mockall",
+ "println_logger",
  "serde",
  "serde_json",
+ "simple_counter",
  "tokio",
+ "uppercaser",
  "warp",
 ]
 
@@ -1079,6 +1091,10 @@ checksum = "16f1d0fef1604ba8f7a073c7e701f213e056707210e9020af4528e0101ce11a6"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "simple_counter"
+version = "0.1.0"
 
 [[package]]
 name = "slab"
@@ -1348,6 +1364,10 @@ name = "unicode-xid"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7fe0bb3479651439c9112f72b6c505038574c9fbb575ed1bf3b797fa39dd564"
+
+[[package]]
+name = "uppercaser"
+version = "0.1.0"
 
 [[package]]
 name = "url"

@@ -1,29 +1,13 @@
-use crate::application::AppError;
-use crate::application::AppResult;
-use crate::application::Post;
-use async_trait::async_trait;
-use mockall::predicate::*;
-use mockall::*;
+use crate::domain::DomainError;
+use crate::domain::PostDomain;
 use serde::Deserialize;
 use std::sync::Arc;
 use warp::Rejection;
 use warp::Reply;
 
-pub struct PostUpdates {
-    pub published: Option<bool>,
-}
-
-#[automock]
-#[async_trait]
-pub trait AsyncPostDb {
-    async fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
-    async fn create_post(&self, title: String, body: String) -> AppResult<Post>;
-    async fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<Post>;
-}
-
 #[derive(Clone)]
 pub struct PostController {
-    post_db: Arc<dyn AsyncPostDb + Send + Sync>,
+    post_db: Arc<dyn PostDomain + Send + Sync>,
 }
 
 #[derive(Deserialize, Debug, Copy, Clone)]
@@ -32,7 +16,7 @@ pub struct QueryParameters {
 }
 
 impl PostController {
-    pub fn new(post_db: Box<dyn AsyncPostDb + Send + Sync>) -> Self {
+    pub fn new(post_db: Box<dyn PostDomain + Send + Sync>) -> Self {
         Self {
             post_db: Arc::from(post_db),
         }
@@ -60,16 +44,11 @@ impl PostController {
 
     pub async fn publish_post(self, post_id: i32) -> Result<impl Reply, Rejection> {
         self.post_db
-            .update_post(
-                post_id,
-                PostUpdates {
-                    published: Some(true),
-                },
-            )
+            .publish_post(post_id)
             .await
             .map(|p| warp::reply::json(&p))
             .map_err(|err| warp::reject::custom(err))
     }
 }
 
-impl warp::reject::Reject for AppError {}
+impl warp::reject::Reject for DomainError {}

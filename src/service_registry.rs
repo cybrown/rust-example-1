@@ -4,24 +4,25 @@ use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
 use crate::adapters::PostDbWrapper;
 use crate::adapters::UppercaserAdapter;
-use crate::application::Application;
-use crate::application::Counter;
-use crate::application::Logger;
-use crate::application::PostDb;
-use crate::application::Uppercaser as AppUppercaser;
-use crate::atomic_counter::AtomicCounter;
-use crate::db::PgConnectionFactory;
-use crate::diesel_post_db::DieselPostDb;
-use crate::post_controller::AsyncPostDb;
-use crate::post_controller::PostController;
-use crate::println_logger::PrintlnLogger;
-use crate::simple_counter::SimpleCounter;
-use crate::uppercaser::Uppercaser;
+use crate::api_warp::PostController;
+use crate::commands::DummyCommand;
+use crate::db_diesel::DieselPostDb;
+use crate::db_diesel::PgConnectionFactory;
+use crate::domain::new_post_domain;
+use crate::domain::AsyncPostDb;
+use crate::domain::Counter;
+use crate::domain::Logger;
+use crate::domain::PostDomain;
+use crate::domain::Uppercaser as AppUppercaser;
+use atomic_counter::AtomicCounter;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
+use println_logger::PrintlnLogger;
+use simple_counter::SimpleCounter;
 use std::rc::Rc;
 use std::time::Duration;
+use uppercaser::Uppercaser;
 
 pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
@@ -63,22 +64,24 @@ impl ServiceRegistry {
         UppercaserAdapter::from(Uppercaser {})
     }
 
-    pub fn get_post_db(&self) -> impl PostDb {
-        PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
-    }
-
     pub fn get_async_post_db(&self) -> impl AsyncPostDb {
         AsyncPostDbWrapper::new(PostDbWrapper::from(DieselPostDb::new(
             self.get_pg_connection_factory(),
         )))
     }
 
-    pub fn get_application(&self) -> Application<impl AppUppercaser, impl Logger, impl PostDb> {
-        Application::new(
+    pub fn get_post_domain(&self) -> impl PostDomain {
+        new_post_domain(Box::new(self.get_async_post_db()))
+    }
+
+    pub fn get_dummy_command(
+        &self,
+    ) -> DummyCommand<impl AppUppercaser, impl Logger, impl PostDomain> {
+        DummyCommand::new(
             self.get_uppercaser(),
-            self.get_logger("app".to_owned()),
+            self.get_logger("dummy".to_owned()),
             self.get_counter(),
-            self.get_post_db(),
+            self.get_post_domain(),
         )
     }
 
@@ -91,6 +94,6 @@ impl ServiceRegistry {
     }
 
     pub fn get_post_controller(&self) -> PostController {
-        PostController::new(Box::new(self.get_async_post_db()))
+        PostController::new(Box::new(self.get_post_domain()))
     }
 }

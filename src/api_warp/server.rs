@@ -1,6 +1,6 @@
-use crate::application::Logger;
-use crate::application::Uppercaser;
-use crate::post_controller::PostController;
+use crate::api_warp::PostController;
+use crate::domain::Logger;
+use crate::domain::Uppercaser;
 use crate::service_registry::ServiceRegistry;
 use std::convert::Infallible;
 use std::sync::Arc;

@@ -1,13 +1,13 @@
-use crate::application::AppError;
-use crate::application::AppResult;
+use crate::domain::DomainError;
+use crate::domain::DomainResult;
 use tokio::task;
 
-pub async fn spawn_blocking<F, R>(f: F) -> AppResult<R>
+pub async fn spawn_blocking<F, R>(f: F) -> DomainResult<R>
 where
-    F: FnOnce() -> AppResult<R> + Send + 'static,
+    F: FnOnce() -> DomainResult<R> + Send + 'static,
     R: Send + 'static,
 {
     task::spawn_blocking(f)
         .await
-        .map_err(|_| AppError::new("failed to spawn thread for blocking operation".to_owned()))?
+        .map_err(|_| DomainError::new("failed to spawn thread for blocking operation".to_owned()))?
 }

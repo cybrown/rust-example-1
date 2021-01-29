@@ -1,33 +1,27 @@
 mod adapters;
-mod application;
-mod atomic_counter;
-mod db;
-mod diesel_post_db;
-mod post_controller;
-mod println_logger;
-mod schema;
-mod server;
+mod api_warp;
+mod commands;
+mod db_diesel;
+mod domain;
 mod service_registry;
-mod simple_counter;
-mod uppercaser;
 mod util;
 
 #[macro_use]
 extern crate diesel;
 
-use crate::server::run_server;
+use crate::api_warp::run_server;
 use crate::service_registry::ServiceRegistry;
 
-fn dummy_cli_command() {
+async fn run_dummy_command() {
     let sr = ServiceRegistry::new();
 
     // Instantiate many applications who share the same dependencies
-    let app1 = sr.get_application();
-    let app2 = sr.get_application();
+    let dummy_command1 = sr.get_dummy_command();
+    let dummy_command2 = sr.get_dummy_command();
 
     // Run the applications with the same shared dependencies
-    app1.run();
-    app2.run();
+    dummy_command1.run().await;
+    dummy_command2.run().await;
 
     // Show how many time an app was run
     println!("Count: {}", sr.get_counter().get_value());
@@ -40,7 +34,7 @@ async fn main() {
         if args[1] == "server" {
             run_server().await;
         } else if args[1] == "dummy" {
-            dummy_cli_command();
+            run_dummy_command().await;
         }
     }
 }

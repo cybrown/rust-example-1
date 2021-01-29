@@ -1,80 +1,28 @@
-use crate::post_controller::PostUpdates;
-use mockall::predicate::*;
-use mockall::*;
-use serde::Serialize;
+use crate::domain::Counter;
+use crate::domain::Logger;
+use crate::domain::PostDomain;
+use crate::domain::Uppercaser;
 use std::rc::Rc;
 
-// Expected interface for a logger
-#[automock]
-pub trait Logger {
-    fn log(&self, str: String);
-}
-
-// Expected interface for a dummy service to uppercase a string
-#[automock]
-pub trait Uppercaser {
-    fn to_uppercase(&self, str: String) -> String;
-}
-
-// Expected interface for a counter
-#[automock]
-pub trait Counter {
-    fn increment(&self);
-    fn get_value(&self) -> i32;
-}
-
-#[derive(Serialize)]
-pub struct Post {
-    pub id: i32,
-    pub title: String,
-    pub body: String,
-    pub published: bool,
-}
-
-#[automock]
-pub trait PostDb {
-    fn get_posts(&self, show_all: bool) -> AppResult<Vec<Post>>;
-    fn create_post(&self, title: String, body: String) -> AppResult<Post>;
-    fn update_post(&self, post_id: i32, updates: PostUpdates) -> AppResult<Post>;
-}
-
-#[derive(Debug)]
-pub struct AppError {
-    message: String,
-}
-
-pub type AppResult<T> = Result<T, AppError>;
-
-impl AppError {
-    pub fn new(message: String) -> Self {
-        Self { message }
-    }
-}
-
-impl From<diesel::result::Error> for AppError {
-    fn from(_: diesel::result::Error) -> Self {
-        Self::new("database error".to_owned())
-    }
-}
-
-// Main application
-pub struct Application<U: Uppercaser, L: Logger, P: PostDb> {
+// Dummy command to run a process from the command line
+pub struct DummyCommand<U: Uppercaser, L: Logger, P: PostDomain> {
     uppercaser: U,
     logger: L,
     counter: Rc<dyn Counter>,
     post_db: P,
 }
 
-impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
+impl<U: Uppercaser, L: Logger, P: PostDomain> DummyCommand<U, L, P> {
     // A method that uses the dependencies
-    pub fn run(&self) {
-        self.logger.log("Start app !".to_owned());
+    pub async fn run(&self) {
+        self.logger.log("Start dummy command !".to_owned());
         self.counter.increment();
         let k = "hello".to_owned();
         let c = self.uppercaser.to_uppercase(k);
         println!("Hello: {}", c);
         self.post_db
             .get_posts(false)
+            .await
             .map(|posts| {
                 for post in posts {
                     println!("Post: {}", post.title);
@@ -83,6 +31,7 @@ impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
             .unwrap();
         self.post_db
             .create_post("hello 2".to_owned(), "another body".to_owned())
+            .await
             .unwrap();
     }
 
@@ -100,10 +49,15 @@ impl<U: Uppercaser, L: Logger, P: PostDb> Application<U, L, P> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::MockCounter;
+    use crate::domain::MockLogger;
+    use crate::domain::MockPostDomain;
+    use crate::domain::MockUppercaser;
+    use crate::domain::Post;
 
-    #[test]
-    fn test_run() {
-        let app = Application::new(
+    #[tokio::test]
+    async fn test_run() {
+        let dummy_command = DummyCommand::new(
             {
                 let mut mock = MockUppercaser::new();
                 mock.expect_to_uppercase()
@@ -123,7 +77,7 @@ mod tests {
                 Rc::new(mock)
             },
             {
-                let mut mock = MockPostDb::new();
+                let mut mock = MockPostDomain::new();
                 mock.expect_get_posts().returning(|_| Ok(vec![]));
                 mock.expect_create_post().returning(|_, _| {
                     Ok(Post {
@@ -137,6 +91,6 @@ mod tests {
             },
         );
 
-        app.run();
+        dummy_command.run().await;
     }
 }
