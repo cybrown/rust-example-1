@@ -2,11 +2,11 @@ use crate::db_diesel::DieselPostDb;
 use crate::db_diesel::GetPostsCriteria;
 use crate::db_diesel::Post;
 use crate::db_diesel::UpdatePost;
-use crate::domain::DomainError;
-use crate::domain::DomainResult;
-use crate::domain::Post as DomainPost;
-use crate::domain::PostDb;
-use crate::domain::PostUpdates;
+use domain::DomainError;
+use domain::DomainResult;
+use domain::Post as DomainPost;
+use domain::PostDb;
+use domain::PostUpdates;
 
 #[derive(Clone)]
 pub struct PostDbWrapper {

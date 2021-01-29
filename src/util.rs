@@ -1,5 +1,5 @@
-use crate::domain::DomainError;
-use crate::domain::DomainResult;
+use domain::DomainError;
+use domain::DomainResult;
 use tokio::task;
 
 pub async fn spawn_blocking<F, R>(f: F) -> DomainResult<R>

@@ -2,7 +2,6 @@ mod adapters;
 mod api_warp;
 mod commands;
 mod db_diesel;
-mod domain;
 mod service_registry;
 mod util;
 

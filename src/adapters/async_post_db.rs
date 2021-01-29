@@ -1,10 +1,10 @@
-use crate::domain::AsyncPostDb;
-use crate::domain::DomainResult;
-use crate::domain::Post as DomainPost;
-use crate::domain::PostDb;
-use crate::domain::PostUpdates;
 use crate::util::spawn_blocking;
 use async_trait::async_trait;
+use domain::AsyncPostDb;
+use domain::DomainResult;
+use domain::Post as DomainPost;
+use domain::PostDb;
+use domain::PostUpdates;
 
 pub struct AsyncPostDbWrapper<P: PostDb + Clone + Send + Sync + 'static> {
     post_db: P,

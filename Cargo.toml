@@ -18,6 +18,7 @@ simple_counter = { path = "crates/simple_counter" }
 atomic_counter = { path = "crates/atomic_counter" }
 println_logger = { path = "crates/println_logger" }
 uppercaser = { path = "crates/uppercaser" }
+domain = { path = "crates/domain" }
 
 [[bin]]
 name = "rust30"

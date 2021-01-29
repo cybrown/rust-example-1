@@ -1,5 +1,5 @@
-use crate::domain::Counter;
 use atomic_counter::AtomicCounter;
+use domain::Counter;
 
 pub struct AtomicCounterAdapter {
     atomic_counter: AtomicCounter,

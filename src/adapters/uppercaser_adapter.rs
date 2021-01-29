@@ -1,4 +1,4 @@
-use crate::domain::Uppercaser as AppUppercaser;
+use domain::Uppercaser as AppUppercaser;
 use uppercaser::Uppercaser;
 
 pub struct UppercaserAdapter {

@@ -1,7 +1,7 @@
 use crate::api_warp::PostController;
-use crate::domain::Logger;
-use crate::domain::Uppercaser;
 use crate::service_registry::ServiceRegistry;
+use domain::Logger;
+use domain::Uppercaser;
 use std::convert::Infallible;
 use std::sync::Arc;
 use warp::get;

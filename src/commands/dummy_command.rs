@@ -1,7 +1,7 @@
-use crate::domain::Counter;
-use crate::domain::Logger;
-use crate::domain::PostDomain;
-use crate::domain::Uppercaser;
+use domain::Counter;
+use domain::Logger;
+use domain::PostDomain;
+use domain::Uppercaser;
 use std::rc::Rc;
 
 // Dummy command to run a process from the command line
@@ -49,11 +49,11 @@ impl<U: Uppercaser, L: Logger, P: PostDomain> DummyCommand<U, L, P> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::MockCounter;
-    use crate::domain::MockLogger;
-    use crate::domain::MockPostDomain;
-    use crate::domain::MockUppercaser;
-    use crate::domain::Post;
+    use domain::MockCounter;
+    use domain::MockLogger;
+    use domain::MockPostDomain;
+    use domain::MockUppercaser;
+    use domain::Post;
 
     #[tokio::test]
     async fn test_run() {

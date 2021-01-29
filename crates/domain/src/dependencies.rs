@@ -1,4 +1,4 @@
-use crate::domain::Post;
+use crate::post::Post;
 use async_trait::async_trait;
 use mockall::predicate::*;
 use mockall::*;

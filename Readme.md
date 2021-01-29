@@ -7,6 +7,9 @@ Example api project using Rust.
     /crates
         Libraries that could be external dependencies
 
+        /domain
+            Special crate that provides all the business rules and provides all the expected traits
+
     /migrations
         sql schema to run with diesel-cli
 

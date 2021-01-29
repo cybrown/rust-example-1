@@ -1,4 +1,4 @@
-use crate::domain::Counter;
+use domain::Counter;
 use simple_counter::SimpleCounter;
 use std::sync::Mutex;
 

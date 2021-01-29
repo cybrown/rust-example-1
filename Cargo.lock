@@ -188,6 +188,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "mockall",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "downcast"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -972,6 +982,7 @@ dependencies = [
  "async-trait",
  "atomic_counter",
  "diesel",
+ "domain",
  "mockall",
  "println_logger",
  "serde",

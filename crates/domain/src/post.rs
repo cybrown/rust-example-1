@@ -1,6 +1,6 @@
-use crate::domain::AsyncPostDb;
-use crate::domain::DomainResult;
-use crate::domain::PostUpdates;
+use crate::dependencies::AsyncPostDb;
+use crate::dependencies::DomainResult;
+use crate::dependencies::PostUpdates;
 use async_trait::async_trait;
 use mockall::*;
 use serde::Serialize;

@@ -1,4 +1,4 @@
-use crate::domain::Logger;
+use domain::Logger;
 use println_logger::PrintlnLogger;
 
 pub struct LoggerAdapter {

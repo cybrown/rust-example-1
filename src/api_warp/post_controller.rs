@@ -1,5 +1,5 @@
-use crate::domain::DomainError;
-use crate::domain::PostDomain;
+use domain::DomainError;
+use domain::PostDomain;
 use serde::Deserialize;
 use std::sync::Arc;
 use warp::Rejection;
@@ -31,7 +31,7 @@ impl PostController {
             .get_posts(show_all)
             .await
             .map(|posts| warp::reply::json(&posts))
-            .map_err(|err| warp::reject::custom(err))
+            .map_err(|err| warp::reject::custom(ApiError::from(err)))
     }
 
     pub async fn create_post(self) -> Result<impl Reply, Rejection> {
@@ -39,7 +39,7 @@ impl PostController {
             .create_post("title".to_owned(), "body".to_owned())
             .await
             .map(|p| warp::reply::json(&p))
-            .map_err(|err| warp::reject::custom(err))
+            .map_err(|err| warp::reject::custom(ApiError::from(err)))
     }
 
     pub async fn publish_post(self, post_id: i32) -> Result<impl Reply, Rejection> {
@@ -47,8 +47,17 @@ impl PostController {
             .publish_post(post_id)
             .await
             .map(|p| warp::reply::json(&p))
-            .map_err(|err| warp::reject::custom(err))
+            .map_err(|err| warp::reject::custom(ApiError::from(err)))
     }
 }
 
-impl warp::reject::Reject for DomainError {}
+#[derive(Debug)]
+struct ApiError(DomainError);
+
+impl From<DomainError> for ApiError {
+    fn from(err: DomainError) -> Self {
+        Self(err)
+    }
+}
+
+impl warp::reject::Reject for ApiError {}
