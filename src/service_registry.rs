@@ -1,4 +1,3 @@
-use crate::adapters::AsyncPostDbWrapper;
 use crate::adapters::AtomicCounterAdapter;
 use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
@@ -13,9 +12,9 @@ use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
 use domain::new_post_domain;
-use domain::AsyncPostDb;
 use domain::Counter;
 use domain::Logger;
+use domain::PostDb;
 use domain::PostDomain;
 use domain::Uppercaser as AppUppercaser;
 use println_logger::PrintlnLogger;
@@ -64,14 +63,12 @@ impl ServiceRegistry {
         UppercaserAdapter::from(Uppercaser {})
     }
 
-    pub fn get_async_post_db(&self) -> impl AsyncPostDb {
-        AsyncPostDbWrapper::new(PostDbWrapper::from(DieselPostDb::new(
-            self.get_pg_connection_factory(),
-        )))
+    pub fn get_post_db(&self) -> impl PostDb {
+        PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
     }
 
     pub fn get_post_domain(&self) -> impl PostDomain {
-        new_post_domain(Box::new(self.get_async_post_db()))
+        new_post_domain(Box::new(self.get_post_db()))
     }
 
     pub fn get_dummy_command(

@@ -2,11 +2,12 @@ use crate::db_diesel::DieselPostDb;
 use crate::db_diesel::GetPostsCriteria;
 use crate::db_diesel::Post;
 use crate::db_diesel::UpdatePost;
-use domain::DomainError;
+use crate::util::spawn_blocking;
+use async_trait::async_trait;
 use domain::DomainResult;
 use domain::Post as DomainPost;
-use domain::PostDb;
 use domain::PostUpdates;
+use domain::{DomainError, PostDb};
 
 #[derive(Clone)]
 pub struct PostDbWrapper {
@@ -19,36 +20,53 @@ impl From<DieselPostDb> for PostDbWrapper {
     }
 }
 
+#[async_trait]
 impl PostDb for PostDbWrapper {
-    fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<DomainPost>> {
-        self.post_db
-            .get_post_by_id(post_id)
-            .map(|post| post.map(|post| db_post_to_app_post(&post)))
-            .map_err(|_| DomainError::new("failed to get post".to_owned()))
+    async fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<DomainPost>> {
+        let post_db = self.post_db.clone();
+        spawn_blocking(move || {
+            post_db
+                .get_post_by_id(post_id)
+                .map(|post| post.map(|post| db_post_to_app_post(&post)))
+                .map_err(|_| DomainError::new("failed to get post".to_owned()))
+        })
+        .await
     }
 
-    fn get_posts(&self, show_all: bool) -> DomainResult<Vec<DomainPost>> {
-        self.post_db
-            .get_posts(GetPostsCriteria {
-                published: if show_all { None } else { Some(true) },
-            })
-            .map(|posts| {
-                posts
-                    .iter()
-                    .map(|post| db_post_to_app_post(post))
-                    .collect::<Vec<DomainPost>>()
-            })
-            .map_err(|_| DomainError::new("failed to get posts".to_owned()))
+    async fn get_posts(&self, show_all: bool) -> DomainResult<Vec<DomainPost>> {
+        let post_db = self.post_db.clone();
+        spawn_blocking(move || {
+            post_db
+                .get_posts(GetPostsCriteria {
+                    published: if show_all { None } else { Some(true) },
+                })
+                .map(|posts| {
+                    posts
+                        .iter()
+                        .map(|post| db_post_to_app_post(post))
+                        .collect::<Vec<DomainPost>>()
+                })
+                .map_err(|_| DomainError::new("failed to get posts".to_owned()))
+        })
+        .await
     }
 
-    fn create_post(&self, title: String, body: String) -> DomainResult<DomainPost> {
-        self.post_db
-            .insert_post(title, body)
-            .map(|post| db_post_to_app_post(&post))
-            .map_err(|_| DomainError::new("failed to create post".to_owned()))
+    async fn create_post(&self, title: String, body: String) -> DomainResult<DomainPost> {
+        let post_db = self.post_db.clone();
+        spawn_blocking(move || {
+            post_db
+                .insert_post(title, body)
+                .map(|post| db_post_to_app_post(&post))
+                .map_err(|_| DomainError::new("failed to create post".to_owned()))
+        })
+        .await
     }
 
-    fn update_post(&self, post_id: i32, updates: PostUpdates) -> DomainResult<Option<DomainPost>> {
+    async fn update_post(
+        &self,
+        post_id: i32,
+        updates: PostUpdates,
+    ) -> DomainResult<Option<DomainPost>> {
         self.post_db
             .update_post(
                 post_id,

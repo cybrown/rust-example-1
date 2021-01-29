@@ -1,5 +1,5 @@
-use crate::dependencies::AsyncPostDb;
 use crate::dependencies::DomainResult;
+use crate::dependencies::PostDb;
 use crate::dependencies::PostUpdates;
 use async_trait::async_trait;
 use mockall::*;
@@ -21,12 +21,12 @@ pub trait PostDomain {
     async fn publish_post(&self, post_id: i32) -> DomainResult<Option<Post>>;
 }
 
-pub fn new_post_domain(post_db: Box<dyn AsyncPostDb + Send + Sync>) -> impl PostDomain {
+pub fn new_post_domain(post_db: Box<dyn PostDb + Send + Sync>) -> impl PostDomain {
     PostDomainImpl { post_db }
 }
 
 struct PostDomainImpl {
-    post_db: Box<dyn AsyncPostDb + Send + Sync>,
+    post_db: Box<dyn PostDb + Send + Sync>,
 }
 
 #[async_trait]
