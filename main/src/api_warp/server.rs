@@ -20,7 +20,8 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
 }
 
 pub async fn run_server() {
-    let service_registry = ServiceRegistry::new();
+    let mut service_registry = ServiceRegistry::new();
+    service_registry.init().await;
 
     let hello = {
         let uppercaser = Arc::new(service_registry.get_uppercaser());

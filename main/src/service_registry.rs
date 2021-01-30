@@ -8,6 +8,7 @@ use crate::commands::DummyCommand;
 use crate::db_diesel::DieselPostDb;
 use crate::db_diesel::PgConnectionFactory;
 use atomic_counter::AtomicCounter;
+use db::SqlxPostDb;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
@@ -27,6 +28,7 @@ pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
     mutex_counter: Rc<MutexCounterWrapper>,
     pool: Pool<ConnectionManager<PgConnection>>,
+    sqlx_post_db: Option<SqlxPostDb>,
 }
 
 impl ServiceRegistry {
@@ -42,8 +44,13 @@ impl ServiceRegistry {
                 atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
                 mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
                 pool,
+                sqlx_post_db: None,
             })
             .expect("failed to create connexion pool")
+    }
+
+    pub async fn init(&mut self) {
+        self.sqlx_post_db = Some(db::connect().await.expect("failed to create db"));
     }
 
     pub fn get_logger(&self, prefix: String) -> impl Logger {
@@ -68,7 +75,8 @@ impl ServiceRegistry {
     }
 
     pub fn get_post_domain(&self) -> impl PostDomain {
-        new_post_domain(Box::new(self.get_post_db()))
+        new_post_domain(Box::new(self.get_db()))
+        // new_post_domain(Box::new(self.get_post_db())) // Swap this line to use diesel instead of sqlx
     }
 
     pub fn get_dummy_command(
@@ -92,5 +100,9 @@ impl ServiceRegistry {
 
     pub fn get_post_controller(&self) -> PostController {
         PostController::new(Box::new(self.get_post_domain()))
+    }
+
+    pub fn get_db(&self) -> impl PostDb {
+        self.sqlx_post_db.clone().expect("db not created")
     }
 }

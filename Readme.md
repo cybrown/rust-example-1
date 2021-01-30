@@ -95,8 +95,8 @@ Example api project using Rust.
 * [x] Run sql queries in dedicated threads for blocking apis
 
 ### Database (sqlx)
-* [ ] Setup sqlx
-* [ ] Run at least one data query with sqlx
+* [x] Setup sqlx
+* [x] Run at least one data query with sqlx
 * [ ] Run at least one data update query with sqlx
 * [ ] Transactions
 
