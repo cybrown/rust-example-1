@@ -27,6 +27,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "api"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "domain",
+ "serde 1.0.123",
+ "serde_json",
+ "warp",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -196,6 +207,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "command"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "domain",
+ "mockall",
+ "tokio",
+]
+
+[[package]]
 name = "config"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -277,6 +298,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "db_diesel"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "domain",
+]
+
+[[package]]
 name = "diesel"
 version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -331,7 +360,6 @@ dependencies = [
  "async-trait",
  "mockall",
  "serde 1.0.123",
- "serde_json",
 ]
 
 [[package]]
@@ -1327,11 +1355,13 @@ checksum = "3e52c148ef37f8c375d49d5a73aa70713125b7f19095948a923f80afdeb22ec2"
 name = "rust30"
 version = "0.1.0"
 dependencies = [
+ "api",
  "async-trait",
  "atomic_counter",
+ "command",
  "config",
  "db",
- "diesel",
+ "db_diesel",
  "domain",
  "mockall",
  "println_logger",
@@ -1340,7 +1370,6 @@ dependencies = [
  "simple_counter",
  "tokio",
  "uppercaser",
- "warp",
 ]
 
 [[package]]

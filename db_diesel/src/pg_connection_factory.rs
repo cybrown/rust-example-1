@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel::PgConnection;
@@ -20,6 +22,17 @@ impl PgConnectionFactory {
     > {
         self.pool.get().map_err(|_| DbError {})
     }
+}
+
+pub fn create_pg_pool() -> Pool<ConnectionManager<PgConnection>> {
+    Pool::builder()
+        .min_idle(Some(0))
+        .max_size(16)
+        .idle_timeout(Some(Duration::from_secs(60)))
+        .build(ConnectionManager::<PgConnection>::new(
+            "postgres://postgres@localhost/postgres",
+        ))
+        .expect("failed to create connexion pool")
 }
 
 #[derive(Debug)]

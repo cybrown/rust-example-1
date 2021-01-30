@@ -1,9 +1,9 @@
-use crate::db_diesel::DieselPostDb;
-use crate::db_diesel::GetPostsCriteria;
-use crate::db_diesel::Post;
-use crate::db_diesel::UpdatePost;
 use crate::util::spawn_blocking;
 use async_trait::async_trait;
+use db_diesel::DieselPostDb;
+use db_diesel::GetPostsCriteria;
+use db_diesel::Post;
+use db_diesel::UpdatePost;
 use domain::DomainResult;
 use domain::Post as DomainPost;
 use domain::{DomainError, PostDb};

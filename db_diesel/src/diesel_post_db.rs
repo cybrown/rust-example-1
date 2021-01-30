@@ -1,6 +1,6 @@
-use crate::db_diesel::schema::posts;
-use crate::db_diesel::DbError;
-use crate::db_diesel::PgConnectionFactory;
+use crate::schema::posts;
+use crate::DbError;
+use crate::PgConnectionFactory;
 
 use diesel::prelude::*;
 

@@ -1,11 +1,6 @@
-use crate::api_warp::PostController;
-use crate::service_registry::ServiceRegistry;
-use domain::Logger;
-use domain::Uppercaser;
+use crate::PostController;
 use std::convert::Infallible;
-use std::sync::Arc;
 use warp::get;
-use warp::path;
 use warp::post;
 use warp::put;
 use warp::serve;
@@ -19,25 +14,9 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
     ))
 }
 
-pub async fn run_server() {
-    let mut service_registry = ServiceRegistry::new();
-    service_registry.init().await;
-
-    let hello = {
-        let uppercaser = Arc::new(service_registry.get_uppercaser());
-        let logger = Arc::new(service_registry.get_logger("server".to_owned()));
-
-        path!("hello" / String).map(move |name| {
-            logger.log("Incoming request".to_owned());
-            format!("Hello, {}!", uppercaser.to_uppercase(name))
-        })
-    };
-
+pub async fn run_server(post_controller: PostController) {
     let posts_api = {
-        let with_post_controller = {
-            let post_controller = service_registry.get_post_controller();
-            warp::any().map(move || post_controller.clone())
-        };
+        let with_post_controller = { warp::any().map(move || post_controller.clone()) };
 
         let get_posts = get()
             .and(with_post_controller.clone())
@@ -60,7 +39,7 @@ pub async fn run_server() {
 
     println!("Listening incoming connexions...");
 
-    serve(hello.or(posts_api).recover(handle_rejection))
+    serve(posts_api.recover(handle_rejection))
         .run(([127, 0, 0, 1], 3030))
         .await;
 }

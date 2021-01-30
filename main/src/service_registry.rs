@@ -3,16 +3,13 @@ use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
 use crate::adapters::PostDbWrapper;
 use crate::adapters::UppercaserAdapter;
-use crate::api_warp::PostController;
-use crate::commands::DummyCommand;
-use crate::db_diesel::DieselPostDb;
-use crate::db_diesel::PgConnectionFactory;
+use api::PostController;
 use atomic_counter::AtomicCounter;
+use command::DummyCommand;
 use config::{Config, ConfigError, Environment, File};
 use db::SqlxPostDb;
-use diesel::r2d2::ConnectionManager;
-use diesel::r2d2::Pool;
-use diesel::PgConnection;
+use db_diesel::PgConnectionFactory;
+use db_diesel::{create_pg_pool, DieselPostDb};
 use domain::new_post_domain;
 use domain::Counter;
 use domain::Logger;
@@ -23,14 +20,13 @@ use println_logger::PrintlnLogger;
 use serde::Deserialize;
 use simple_counter::SimpleCounter;
 use std::rc::Rc;
-use std::time::Duration;
 use uppercaser::Uppercaser;
 
 pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
     mutex_counter: Rc<MutexCounterWrapper>,
-    pool: Pool<ConnectionManager<PgConnection>>,
     sqlx_post_db: Option<SqlxPostDb>,
+    pg_connexion_factory: PgConnectionFactory,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,20 +41,12 @@ pub struct Configuration {
 
 impl ServiceRegistry {
     pub fn new() -> Self {
-        Pool::builder()
-            .min_idle(Some(0))
-            .max_size(16)
-            .idle_timeout(Some(Duration::from_secs(60)))
-            .build(ConnectionManager::<PgConnection>::new(
-                "postgres://postgres@localhost/postgres",
-            ))
-            .map(|pool| Self {
-                atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
-                mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
-                pool,
-                sqlx_post_db: None,
-            })
-            .expect("failed to create connexion pool")
+        Self {
+            atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
+            mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
+            sqlx_post_db: None,
+            pg_connexion_factory: PgConnectionFactory::new(create_pg_pool()),
+        }
     }
 
     pub async fn init(&mut self) {
@@ -123,12 +111,8 @@ impl ServiceRegistry {
         )
     }
 
-    pub fn get_pg_pool(&self) -> Pool<ConnectionManager<PgConnection>> {
-        self.pool.clone()
-    }
-
     pub fn get_pg_connection_factory(&self) -> PgConnectionFactory {
-        PgConnectionFactory::new(self.get_pg_pool())
+        self.pg_connexion_factory.clone()
     }
 
     pub fn get_post_controller(&self) -> PostController {

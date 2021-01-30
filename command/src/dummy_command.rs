@@ -49,11 +49,7 @@ impl<U: Uppercaser, L: Logger, P: PostDomain> DummyCommand<U, L, P> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use domain::MockCounter;
-    use domain::MockLogger;
-    use domain::MockPostDomain;
-    use domain::MockUppercaser;
-    use domain::Post;
+    use domain::*;
 
     #[tokio::test]
     async fn test_run() {
