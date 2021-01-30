@@ -10,6 +10,9 @@ Example api project using Rust.
     /domain
         Implementation of the business rules
 
+    /db
+        Sqlx database adapter
+
     /main
         /adapters
             Adapters wrapping external libraries to implement traits provided by the domain
