@@ -20,6 +20,7 @@ println_logger = { path = "../println_logger" }
 uppercaser = { path = "../uppercaser" }
 domain = { path = "../domain" }
 db = { path = "../db" }
+config = "0.10.1"
 
 [[bin]]
 name = "rust30"

@@ -6,7 +6,6 @@ use crate::util::spawn_blocking;
 use async_trait::async_trait;
 use domain::DomainResult;
 use domain::Post as DomainPost;
-use domain::PostUpdates;
 use domain::{DomainError, PostDb};
 
 #[derive(Clone)]
@@ -62,10 +61,10 @@ impl PostDb for PostDbWrapper {
         .await
     }
 
-    async fn update_post(
+    async fn post_set_published(
         &self,
         post_id: i32,
-        updates: PostUpdates,
+        published: bool,
     ) -> DomainResult<Option<DomainPost>> {
         self.post_db
             .update_post(
@@ -73,7 +72,7 @@ impl PostDb for PostDbWrapper {
                 UpdatePost {
                     body: None,
                     title: None,
-                    published: updates.published,
+                    published: Some(published),
                 },
             )
             .map(|post| post.map(|post| db_post_to_app_post(&post)))

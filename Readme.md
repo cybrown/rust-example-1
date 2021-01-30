@@ -72,14 +72,6 @@ Example api project using Rust.
 * [x] Split in multiple projects
 * [x] Use cargo workspaces
 
-### Continuous integration
-* [ ] Check formating
-* [ ] Run additional static analysis tools
-* [ ] Investigate how to get standard unit tests reports
-* [ ] Investigate how to get standard coverage reports for unit tests
-* [ ] Investigate how to get standard integration tests reports
-* [ ] Investigate how to get standard coverage reports for integration tests
-
 ### Error handling
 * [x] Seperate error between services and consumers
 * [ ] Try anyhow
@@ -94,13 +86,13 @@ Example api project using Rust.
 * [x] Setup diesel
 * [x] Run at least one data query with diesel
 * [x] Run at least one data update query with diesel
-* [ ] Transactions
 * [x] Run sql queries in dedicated threads for blocking apis
+* [ ] Transactions (not available with an async workflow)
 
 ### Database (sqlx)
 * [x] Setup sqlx
 * [x] Run at least one data query with sqlx
-* [ ] Run at least one data update query with sqlx
+* [x] Run at least one data update query with sqlx
 * [ ] Transactions
 
 ### HTTP Server
@@ -115,10 +107,18 @@ Example api project using Rust.
 * [ ] Return a request id in a header
 
 ### Configuration
-* [ ] Environment variables
-* [ ] Read a configuration file in many formats
+* [x] Environment variables
+* [x] Read a configuration file in many formats
 * [ ] Read cli args
 * [ ] Use secrets from a cloud provider or vault
+
+### Continuous integration
+* [ ] Check formating
+* [ ] Run additional static analysis tools
+* [ ] Investigate how to get standard unit tests reports
+* [ ] Investigate how to get standard coverage reports for unit tests
+* [ ] Investigate how to get standard integration tests reports
+* [ ] Investigate how to get standard coverage reports for integration tests
 
 ### HTTP Client
 

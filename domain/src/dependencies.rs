@@ -22,17 +22,14 @@ pub trait Counter {
     fn get_value(&self) -> i32;
 }
 
-pub struct PostUpdates {
-    pub published: Option<bool>,
-}
-
 #[automock]
 #[async_trait]
 pub trait PostDb {
     async fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<Post>>;
     async fn get_posts(&self, show_all: bool) -> DomainResult<Vec<Post>>;
     async fn create_post(&self, title: String, body: String) -> DomainResult<Post>;
-    async fn update_post(&self, post_id: i32, updates: PostUpdates) -> DomainResult<Option<Post>>;
+    async fn post_set_published(&self, post_id: i32, published: bool)
+        -> DomainResult<Option<Post>>;
 }
 
 #[derive(Debug)]

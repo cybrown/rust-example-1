@@ -1,6 +1,5 @@
 use crate::dependencies::DomainResult;
 use crate::dependencies::PostDb;
-use crate::dependencies::PostUpdates;
 use async_trait::async_trait;
 use mockall::*;
 use serde::Serialize;
@@ -43,15 +42,7 @@ impl PostDomain for PostDomainImpl {
         let post = self.post_db.get_post_by_id(post_id).await?;
         if let Some(post) = post.clone() {
             if !post.published {
-                return self
-                    .post_db
-                    .update_post(
-                        post_id,
-                        PostUpdates {
-                            published: Some(true),
-                        },
-                    )
-                    .await;
+                return self.post_db.post_set_published(post_id, true).await;
             }
         }
         Ok(post)

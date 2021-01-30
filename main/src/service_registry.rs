@@ -8,6 +8,7 @@ use crate::commands::DummyCommand;
 use crate::db_diesel::DieselPostDb;
 use crate::db_diesel::PgConnectionFactory;
 use atomic_counter::AtomicCounter;
+use config::{Config, ConfigError, Environment, File};
 use db::SqlxPostDb;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
@@ -19,6 +20,7 @@ use domain::PostDb;
 use domain::PostDomain;
 use domain::Uppercaser as AppUppercaser;
 use println_logger::PrintlnLogger;
+use serde::Deserialize;
 use simple_counter::SimpleCounter;
 use std::rc::Rc;
 use std::time::Duration;
@@ -29,6 +31,16 @@ pub struct ServiceRegistry {
     mutex_counter: Rc<MutexCounterWrapper>,
     pool: Pool<ConnectionManager<PgConnection>>,
     sqlx_post_db: Option<SqlxPostDb>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DatabaseConfiguration {
+    pub backend: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Configuration {
+    pub database: DatabaseConfiguration,
 }
 
 impl ServiceRegistry {
@@ -53,6 +65,18 @@ impl ServiceRegistry {
         self.sqlx_post_db = Some(db::connect().await.expect("failed to create db"));
     }
 
+    pub fn get_config_inner(&self) -> Result<Configuration, ConfigError> {
+        let mut s = Config::new();
+        s.set_default("database.backend", "sqlx")?;
+        s.merge(File::with_name("config").required(false))?;
+        s.merge(Environment::with_prefix("app"))?;
+        s.try_into()
+    }
+
+    pub fn get_config(&self) -> Configuration {
+        self.get_config_inner().unwrap()
+    }
+
     pub fn get_logger(&self, prefix: String) -> impl Logger {
         LoggerAdapter::from(PrintlnLogger::new(prefix))
     }
@@ -70,13 +94,22 @@ impl ServiceRegistry {
         UppercaserAdapter::from(Uppercaser {})
     }
 
-    pub fn get_post_db(&self) -> impl PostDb {
+    pub fn get_db_diesel(&self) -> impl PostDb {
         PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
     }
 
     pub fn get_post_domain(&self) -> impl PostDomain {
-        new_post_domain(Box::new(self.get_db()))
-        // new_post_domain(Box::new(self.get_post_db())) // Swap this line to use diesel instead of sqlx
+        let conf = self.get_config();
+        if conf.database.backend == "sqlx" {
+            new_post_domain(Box::new(self.get_db_sqlx()))
+        } else if conf.database.backend == "diesel" {
+            new_post_domain(Box::new(self.get_db_diesel()))
+        } else {
+            panic!(
+                "conf.database.backend is not a valid backend: {}",
+                conf.database.backend
+            )
+        }
     }
 
     pub fn get_dummy_command(
@@ -102,7 +135,7 @@ impl ServiceRegistry {
         PostController::new(Box::new(self.get_post_domain()))
     }
 
-    pub fn get_db(&self) -> impl PostDb {
+    pub fn get_db_sqlx(&self) -> impl PostDb {
         self.sqlx_post_db.clone().expect("db not created")
     }
 }
