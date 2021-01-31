@@ -1,16 +1,24 @@
 use async_trait::async_trait;
 use domain::{DomainError, DomainResult, Post, PostDb};
-use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, query, PgPool, Postgres};
+use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, query_as, PgPool, Postgres};
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct SqlxPostDb {
     pool: PgPool,
 }
 
-pub async fn connect() -> Result<SqlxPostDb, DomainError> {
+pub async fn connect(
+    uri: &str,
+    min_conn: u32,
+    max_conn: u32,
+    max_lifetime: Duration,
+) -> Result<SqlxPostDb, DomainError> {
     let pool = PgPoolOptions::new()
-        .max_connections(16)
-        .connect("postgres://postgres@localhost/postgres")
+        .max_connections(max_conn)
+        .min_connections(min_conn)
+        .max_lifetime(max_lifetime)
+        .connect(uri)
         .await
         .map_err(|_| DomainError::new("failed to select".to_owned()))?;
 
@@ -39,7 +47,8 @@ impl SqlxPostDb {
 impl PostDb for SqlxPostDb {
     async fn get_post_by_id(&self, post_id: i32) -> DomainResult<Option<Post>> {
         let mut tx = self.acquire().await?;
-        let res = query!(
+        let res = query_as!(
+            Post,
             r#"
                 SELECT "id", "title", "body", "published"
                 FROM "posts"
@@ -47,12 +56,6 @@ impl PostDb for SqlxPostDb {
             "#,
             post_id
         )
-        .map(|rec| Post {
-            id: rec.id,
-            title: rec.title,
-            body: rec.body,
-            published: rec.published,
-        })
         .fetch_optional(&mut tx)
         .await
         .map_err(|err| DomainError::new(format!("failed to select: {}", err).to_owned()))?;
@@ -62,34 +65,24 @@ impl PostDb for SqlxPostDb {
     async fn get_posts(&self, show_all: bool) -> DomainResult<Vec<Post>> {
         let mut tx = self.acquire().await?;
         let query = if show_all {
-            query!(
+            query_as!(
+                Post,
                 r#"
                 SELECT "id", "title", "body", "published"
                 FROM "posts"
             "#,
             )
-            .map(|rec| Post {
-                id: rec.id,
-                title: rec.title,
-                body: rec.body,
-                published: rec.published,
-            })
             .fetch_all(&mut tx)
             .await
         } else {
-            query!(
+            query_as!(
+                Post,
                 r#"
                     SELECT "id", "title", "body", "published"
                     FROM "posts"
-                    WHERE "published" = false
+                    WHERE "published" = true
                     "#,
             )
-            .map(|rec| Post {
-                id: rec.id,
-                title: rec.title,
-                body: rec.body,
-                published: rec.published,
-            })
             .fetch_all(&mut tx)
             .await
         };
@@ -99,7 +92,8 @@ impl PostDb for SqlxPostDb {
 
     async fn create_post(&self, title: String, body: String) -> DomainResult<Post> {
         let mut tx = self.acquire().await?;
-        let post = query!(
+        let post = query_as!(
+            Post,
             r#"
                 INSERT INTO "posts" ("title", "body")
                 VALUES ($1, $2)
@@ -108,12 +102,6 @@ impl PostDb for SqlxPostDb {
             title,
             body
         )
-        .map(|rec| Post {
-            id: rec.id,
-            title: rec.title,
-            body: rec.body,
-            published: rec.published,
-        })
         .fetch_one(&mut tx)
         .await
         .map_err(|err| DomainError::new(format!("failed to insert post: {}", err).to_owned()))?;
@@ -126,7 +114,8 @@ impl PostDb for SqlxPostDb {
         published: bool,
     ) -> DomainResult<Option<Post>> {
         let mut tx = self.acquire().await?;
-        let post = query!(
+        let post = query_as!(
+            Post,
             r#"
                 UPDATE "posts"
                 SET "published" = $2
@@ -136,12 +125,6 @@ impl PostDb for SqlxPostDb {
             post_id,
             published,
         )
-        .map(|rec| Post {
-            id: rec.id,
-            title: rec.title,
-            body: rec.body,
-            published: rec.published,
-        })
         .fetch_one(&mut tx)
         .await
         .map_err(|err| DomainError::new(format!("failed to insert post: {}", err).to_owned()))?;

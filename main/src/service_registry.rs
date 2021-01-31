@@ -19,19 +19,23 @@ use domain::Uppercaser as AppUppercaser;
 use println_logger::PrintlnLogger;
 use serde::Deserialize;
 use simple_counter::SimpleCounter;
-use std::rc::Rc;
+use std::{rc::Rc, time::Duration};
 use uppercaser::Uppercaser;
 
 pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
     mutex_counter: Rc<MutexCounterWrapper>,
     sqlx_post_db: Option<SqlxPostDb>,
-    pg_connexion_factory: PgConnectionFactory,
+    pg_connexion_factory: Option<PgConnectionFactory>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseConfiguration {
     pub backend: String,
+    pub uri: String,
+    pub max_conn: u32,
+    pub min_conn: u32,
+    pub max_lifetime: u64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,17 +49,37 @@ impl ServiceRegistry {
             atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
             mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
             sqlx_post_db: None,
-            pg_connexion_factory: PgConnectionFactory::new(create_pg_pool()),
+            pg_connexion_factory: None,
         }
     }
 
     pub async fn init(&mut self) {
-        self.sqlx_post_db = Some(db::connect().await.expect("failed to create db"));
+        let conf = self.get_config();
+        self.sqlx_post_db = Some(
+            db::connect(
+                &*conf.database.uri,
+                conf.database.min_conn,
+                conf.database.max_conn,
+                Duration::from_secs(conf.database.max_lifetime),
+            )
+            .await
+            .expect("failed to create db"),
+        );
+        self.pg_connexion_factory = Some(PgConnectionFactory::new(create_pg_pool(
+            &*conf.database.uri,
+            conf.database.min_conn,
+            conf.database.max_conn,
+            Duration::from_secs(conf.database.max_lifetime),
+        )));
     }
 
     pub fn get_config_inner(&self) -> Result<Configuration, ConfigError> {
         let mut s = Config::new();
         s.set_default("database.backend", "sqlx")?;
+        s.set_default("database.uri", "postgres://postgres@localhost/postgres")?;
+        s.set_default("database.min_conn", 0)?;
+        s.set_default("database.max_conn", 16)?;
+        s.set_default("database.max_lifetime", 60)?;
         s.merge(File::with_name("config").required(false))?;
         s.merge(Environment::with_prefix("app"))?;
         s.try_into()
@@ -112,7 +136,7 @@ impl ServiceRegistry {
     }
 
     pub fn get_pg_connection_factory(&self) -> PgConnectionFactory {
-        self.pg_connexion_factory.clone()
+        self.pg_connexion_factory.clone().unwrap()
     }
 
     pub fn get_post_controller(&self) -> PostController {

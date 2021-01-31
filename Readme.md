@@ -13,19 +13,19 @@ Example api project using Rust.
     /db
         Sqlx database adapter
 
+    /api
+        Api entry points calling the domain
+
+    /commands
+        Command line utilities calling the domain
+
+    /db_diesel
+        Database access for pg using diesel
+
     /main
         /adapters
             Adapters wrapping external libraries to implement traits provided by the domain
             Also converts internal dependencies such as database access
-
-        /api_warp
-            Api entry points calling the domain
-
-        /commands
-            Command line utilities calling the domain
-
-        /db_diesel
-            Database access for pg using diesel
 
         /main.rs
             Entry point of the application
@@ -100,7 +100,7 @@ Example api project using Rust.
 * [x] Route to get all posts
 * [x] Route to create a post
 * [x] Route to publish a post
-* [ ] Route to unpublish a post
+* [x] Route to unpublish a post
 * [ ] Investigate open api v3
 * [ ] Return meaningfull errors for 4** status codes
 * [x] Return 500 on internal errors

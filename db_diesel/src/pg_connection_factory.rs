@@ -24,14 +24,17 @@ impl PgConnectionFactory {
     }
 }
 
-pub fn create_pg_pool() -> Pool<ConnectionManager<PgConnection>> {
+pub fn create_pg_pool(
+    uri: &str,
+    min_conn: u32,
+    max_conn: u32,
+    max_lifetime: Duration,
+) -> Pool<ConnectionManager<PgConnection>> {
     Pool::builder()
-        .min_idle(Some(0))
-        .max_size(16)
-        .idle_timeout(Some(Duration::from_secs(60)))
-        .build(ConnectionManager::<PgConnection>::new(
-            "postgres://postgres@localhost/postgres",
-        ))
+        .min_idle(Some(min_conn))
+        .max_size(max_conn)
+        .idle_timeout(Some(max_lifetime))
+        .build(ConnectionManager::<PgConnection>::new(uri))
         .expect("failed to create connexion pool")
 }
 
