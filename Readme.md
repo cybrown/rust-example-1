@@ -84,6 +84,7 @@ Example api project using Rust.
 
 ### Database (diesel)
 * [x] Setup diesel
+* [x] Setup migrations
 * [x] Run at least one data query with diesel
 * [x] Run at least one data update query with diesel
 * [x] Run sql queries in dedicated threads for blocking apis
@@ -91,6 +92,7 @@ Example api project using Rust.
 
 ### Database (sqlx)
 * [x] Setup sqlx
+* [ ] Setup migrations
 * [x] Run at least one data query with sqlx
 * [x] Run at least one data update query with sqlx
 * [ ] Transactions
