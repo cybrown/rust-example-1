@@ -52,7 +52,9 @@ impl PostController {
         self.post_db
             .create_post(post.title, post.body)
             .await
-            .map(|p| warp::reply::json(&p))
+            .map(|p| {
+                warp::reply::with_status(warp::reply::json(&p), warp::http::StatusCode::CREATED)
+            })
             .map_err(|err| warp::reject::custom(ApiError::from(err)))
     }
 

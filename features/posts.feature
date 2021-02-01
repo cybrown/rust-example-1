@@ -8,7 +8,7 @@ Scenario: Write a new post, publish and unpublish it
     Given url root + '/posts'
     And request { title: #(title), body: #(body) }
     When method POST
-    Then status 200
+    Then status 201
     And match response == { id: "#notnull", title: #(title), body: #(body), published: false }
     * def postId = response.id
 
