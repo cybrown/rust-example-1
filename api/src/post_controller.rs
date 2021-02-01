@@ -2,8 +2,12 @@ use domain::DomainError;
 use domain::PostDomain;
 use serde::Deserialize;
 use std::sync::Arc;
-use warp::Rejection;
-use warp::Reply;
+use warp::{
+    hyper::StatusCode,
+    reject::{custom, Reject},
+    reply::{json, with_status},
+    Rejection, Reply,
+};
 
 #[derive(Clone)]
 pub struct PostController {
@@ -32,46 +36,40 @@ impl PostController {
         self.post_db
             .get_post(post_id)
             .await
-            .map(|post| warp::reply::json(&post))
-            .map_err(|err| warp::reject::custom(ApiError::from(err)))
+            .map(|post| json(&post))
+            .map_err(|err| custom(ApiError::from(err)))
     }
 
     pub async fn get_posts(self, query: QueryParameters) -> Result<impl Reply, Rejection> {
-        let show_all = match query.show_all {
-            Some(a) => a,
-            _ => false,
-        };
         self.post_db
-            .get_posts(show_all)
+            .get_posts(query.show_all.unwrap_or(false))
             .await
-            .map(|posts| warp::reply::json(&posts))
-            .map_err(|err| warp::reject::custom(ApiError::from(err)))
+            .map(|posts| json(&posts))
+            .map_err(|err| custom(ApiError::from(err)))
     }
 
     pub async fn create_post(self, post: WritePost) -> Result<impl Reply, Rejection> {
         self.post_db
             .create_post(post.title, post.body)
             .await
-            .map(|p| {
-                warp::reply::with_status(warp::reply::json(&p), warp::http::StatusCode::CREATED)
-            })
-            .map_err(|err| warp::reject::custom(ApiError::from(err)))
+            .map(|p| with_status(json(&p), StatusCode::CREATED))
+            .map_err(|err| custom(ApiError::from(err)))
     }
 
     pub async fn publish_post(self, post_id: i32) -> Result<impl Reply, Rejection> {
         self.post_db
             .publish_post(post_id)
             .await
-            .map(|p| warp::reply::json(&p))
-            .map_err(|err| warp::reject::custom(ApiError::from(err)))
+            .map(|p| json(&p))
+            .map_err(|err| custom(ApiError::from(err)))
     }
 
     pub async fn unpublish_post(self, post_id: i32) -> Result<impl Reply, Rejection> {
         self.post_db
             .unpublish_post(post_id)
             .await
-            .map(|p| warp::reply::json(&p))
-            .map_err(|err| warp::reject::custom(ApiError::from(err)))
+            .map(|p| json(&p))
+            .map_err(|err| custom(ApiError::from(err)))
     }
 }
 
@@ -84,4 +82,4 @@ impl From<DomainError> for ApiError {
     }
 }
 
-impl warp::reject::Reject for ApiError {}
+impl Reject for ApiError {}
