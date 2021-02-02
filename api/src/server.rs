@@ -12,7 +12,7 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
 
 pub async fn run_server(post_controller: PostController) {
     let posts_api = {
-        let with_post_controller = { any().map(move || post_controller.clone()) };
+        let with_post_controller = any().map(move || post_controller.clone());
 
         let get_posts = get()
             .and(with_post_controller.clone())

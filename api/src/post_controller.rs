@@ -1,10 +1,10 @@
-use domain::DomainError;
+use crate::ApiError;
 use domain::PostDomain;
 use serde::Deserialize;
 use std::sync::Arc;
 use warp::{
     hyper::StatusCode,
-    reject::{custom, Reject},
+    reject::custom,
     reply::{json, with_status},
     Rejection, Reply,
 };
@@ -72,14 +72,3 @@ impl PostController {
             .map_err(|err| custom(ApiError::from(err)))
     }
 }
-
-#[derive(Debug)]
-struct ApiError(DomainError);
-
-impl From<DomainError> for ApiError {
-    fn from(err: DomainError) -> Self {
-        Self(err)
-    }
-}
-
-impl Reject for ApiError {}
