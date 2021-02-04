@@ -18,7 +18,6 @@ println_logger = { path = "../println_logger" }
 uppercaser = { path = "../uppercaser" }
 domain = { path = "../domain" }
 db = { path = "../db" }
-db_diesel = { path = "../db_diesel" }
 api = { path = "../api" }
 command = { path = "../command" }
 config = "0.10.1"

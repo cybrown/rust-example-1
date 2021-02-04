@@ -1,11 +1,8 @@
 # Rust sample api
 
-Example api project using Rust.
+Example api project using Rust, with warp and sqlx.
 
 ## File architecture
-
-    /migrations
-        sql schema to run with diesel-cli
 
     /domain
         Implementation of the business rules
@@ -13,19 +10,18 @@ Example api project using Rust.
     /db
         Sqlx database adapter
 
+        /migrations
+            sql schema to run with sqlx-cli
+
     /api
         Api entry points calling the domain
 
     /commands
         Command line utilities calling the domain
 
-    /db_diesel
-        Database access for pg using diesel
-
     /main
         /adapters
             Adapters wrapping external libraries to implement traits provided by the domain
-            Also converts internal dependencies such as database access
 
         /main.rs
             Entry point of the application
@@ -82,17 +78,9 @@ Example api project using Rust.
 ### Logging
 * [ ] Add logs
 
-### Database (diesel)
-* [x] Setup diesel
-* [x] Setup migrations
-* [x] Run at least one data query with diesel
-* [x] Run at least one data update query with diesel
-* [x] Run sql queries in dedicated threads for blocking apis
-* [ ] Transactions (not available with an async workflow)
-
 ### Database (sqlx)
 * [x] Setup sqlx
-* [ ] Setup migrations
+* [x] Setup migrations
 * [x] Run at least one data query with sqlx
 * [x] Run at least one data update query with sqlx
 * [ ] Transactions

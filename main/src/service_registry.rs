@@ -1,15 +1,12 @@
 use crate::adapters::AtomicCounterAdapter;
 use crate::adapters::LoggerAdapter;
 use crate::adapters::MutexCounterWrapper;
-use crate::adapters::PostDbWrapper;
 use crate::adapters::UppercaserAdapter;
 use api::PostController;
 use atomic_counter::AtomicCounter;
 use command::DummyCommand;
 use config::{Config, ConfigError, Environment, File};
 use db::SqlxPostDb;
-use db_diesel::PgConnectionFactory;
-use db_diesel::{create_pg_pool, DieselPostDb};
 use domain::new_post_domain;
 use domain::Counter;
 use domain::Logger;
@@ -26,12 +23,10 @@ pub struct ServiceRegistry {
     atomic_counter: Rc<AtomicCounterAdapter>,
     mutex_counter: Rc<MutexCounterWrapper>,
     sqlx_post_db: Option<SqlxPostDb>,
-    pg_connexion_factory: Option<PgConnectionFactory>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseConfiguration {
-    pub backend: String,
     pub uri: String,
     pub max_conn: u32,
     pub min_conn: u32,
@@ -49,7 +44,6 @@ impl ServiceRegistry {
             atomic_counter: Rc::new(AtomicCounterAdapter::from(AtomicCounter::new())),
             mutex_counter: Rc::new(MutexCounterWrapper::from(SimpleCounter::new())),
             sqlx_post_db: None,
-            pg_connexion_factory: None,
         }
     }
 
@@ -65,17 +59,10 @@ impl ServiceRegistry {
             .await
             .expect("failed to create db"),
         );
-        self.pg_connexion_factory = Some(PgConnectionFactory::new(create_pg_pool(
-            &*conf.database.uri,
-            conf.database.min_conn,
-            conf.database.max_conn,
-            Duration::from_secs(conf.database.max_lifetime),
-        )));
     }
 
     pub fn get_config_inner(&self) -> Result<Configuration, ConfigError> {
         let mut s = Config::new();
-        s.set_default("database.backend", "sqlx")?;
         s.set_default("database.uri", "postgres://postgres@localhost/postgres")?;
         s.set_default("database.min_conn", 0)?;
         s.set_default("database.max_conn", 16)?;
@@ -106,22 +93,8 @@ impl ServiceRegistry {
         UppercaserAdapter::from(Uppercaser {})
     }
 
-    pub fn get_db_diesel(&self) -> impl PostDb {
-        PostDbWrapper::from(DieselPostDb::new(self.get_pg_connection_factory()))
-    }
-
     pub fn get_post_domain(&self) -> impl PostDomain {
-        let conf = self.get_config();
-        if conf.database.backend == "sqlx" {
-            new_post_domain(Box::new(self.get_db_sqlx()))
-        } else if conf.database.backend == "diesel" {
-            new_post_domain(Box::new(self.get_db_diesel()))
-        } else {
-            panic!(
-                "conf.database.backend is not a valid backend: {}",
-                conf.database.backend
-            )
-        }
+        new_post_domain(Box::new(self.get_db_sqlx()))
     }
 
     pub fn get_dummy_command(
@@ -133,10 +106,6 @@ impl ServiceRegistry {
             self.get_counter(),
             self.get_post_domain(),
         )
-    }
-
-    pub fn get_pg_connection_factory(&self) -> PgConnectionFactory {
-        self.pg_connexion_factory.clone().unwrap()
     }
 
     pub fn get_post_controller(&self) -> PostController {

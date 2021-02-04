@@ -1,0 +1,191 @@
+{
+  "db": "PostgreSQL",
+  "39c662996c8b0e410c77d569d68a003df596a44667a06646b2ab286fa65b33ca": {
+    "query": "\n                UPDATE \"posts\"\n                SET \"published\" = $2\n                WHERE \"id\" = $1\n                RETURNING \"id\", \"title\", \"body\", \"published\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "body",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "published",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "6f52050e2fe4e165896b6b97e3511080f0aa47cb34c1ad7ad2b499eda29dde57": {
+    "query": "\n                INSERT INTO \"posts\" (\"title\", \"body\")\n                VALUES ($1, $2)\n                RETURNING \"id\", \"title\", \"body\", \"published\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "body",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "published",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "8085949741b13983d1b23b0404d9bf22008d5363df82280c757deec14dfc4b31": {
+    "query": "\n                SELECT \"id\", \"title\", \"body\", \"published\"\n                FROM \"posts\"\n                WHERE \"id\" = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "body",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "published",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "b4b376f9a13a07ff6f52924c33e28e1c13b298ff7d486fc0f7c3b7d84fc373ce": {
+    "query": "\n                SELECT \"id\", \"title\", \"body\", \"published\"\n                FROM \"posts\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "body",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "published",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "cfd60024d15af4a5182f94d7a3a22ca4861dac6fa895f531d896716a1e3ed543": {
+    "query": "\n                    SELECT \"id\", \"title\", \"body\", \"published\"\n                    FROM \"posts\"\n                    WHERE \"published\" = true\n                    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "body",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "published",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  }
+}

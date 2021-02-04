@@ -1,6 +1,5 @@
 mod adapters;
 mod service_registry;
-mod util;
 
 use crate::service_registry::ServiceRegistry;
 use api::run_server;
