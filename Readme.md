@@ -32,6 +32,9 @@ Example api project using Rust, with warp and sqlx.
         /util.rs
             Some utility functions
 
+    /features
+        Scenarios to run with karate
+
     /atomic_counter
         A simple thread safe counter
 
