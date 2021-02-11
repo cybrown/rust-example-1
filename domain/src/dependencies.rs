@@ -3,25 +3,6 @@ use async_trait::async_trait;
 use mockall::predicate::*;
 use mockall::*;
 
-// Expected interface for a logger
-#[automock]
-pub trait Logger {
-    fn log(&self, str: String);
-}
-
-// Expected interface for a dummy service to uppercase a string
-#[automock]
-pub trait Uppercaser {
-    fn to_uppercase(&self, str: String) -> String;
-}
-
-// Expected interface for a counter
-#[automock]
-pub trait Counter {
-    fn increment(&self);
-    fn get_value(&self) -> i32;
-}
-
 #[automock]
 #[async_trait]
 pub trait PostDb {

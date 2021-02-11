@@ -2,12 +2,8 @@
 
 members = [
     "api",
-    "atomic_counter",
     "command",
     "domain",
     "main",
-    "println_logger",
-    "simple_counter",
-    "uppercaser",
     "db",
 ]

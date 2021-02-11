@@ -1,3 +1,3 @@
-mod dummy_command;
+mod create_post_command;
 
-pub use dummy_command::*;
+pub use create_post_command::*;
