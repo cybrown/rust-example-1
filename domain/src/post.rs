@@ -22,16 +22,16 @@ pub trait PostDomain {
     async fn unpublish_post(&self, post_id: i32) -> DomainResult<Option<Post>>;
 }
 
-pub fn new_post_domain(post_db: Box<dyn PostDb + Send + Sync>) -> impl PostDomain {
+pub fn new_post_domain(post_db: impl PostDb + Send + Sync) -> impl PostDomain {
     PostDomainImpl { post_db }
 }
 
-struct PostDomainImpl {
-    post_db: Box<dyn PostDb + Send + Sync>,
+struct PostDomainImpl<P: PostDb> {
+    post_db: P,
 }
 
 #[async_trait]
-impl PostDomain for PostDomainImpl {
+impl<P: PostDb + Send + Sync> PostDomain for PostDomainImpl<P> {
     async fn get_post(&self, post_id: i32) -> DomainResult<Option<Post>> {
         self.post_db.get_post_by_id(post_id).await
     }

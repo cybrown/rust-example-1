@@ -1,16 +1,10 @@
 use domain::{DomainResult, Post, PostDomain};
 
-pub struct CreatePostCommand<D>
-where
-    D: PostDomain + Sync + Send,
-{
+pub struct CreatePostCommand<D: PostDomain + Sync + Send> {
     post_domain: D,
 }
 
-impl<D> CreatePostCommand<D>
-where
-    D: PostDomain + Sync + Send,
-{
+impl<D: PostDomain + Sync + Send> CreatePostCommand<D> {
     pub fn new(post_domain: D) -> Self {
         Self { post_domain }
     }

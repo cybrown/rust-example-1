@@ -35,7 +35,7 @@ impl ServiceRegistry {
     }
 
     pub fn get_post_domain(&self) -> impl PostDomain {
-        new_post_domain(Box::new(self.get_db_sqlx()))
+        new_post_domain(self.get_db_sqlx())
     }
 
     pub fn get_post_controller(&self) -> PostController {
