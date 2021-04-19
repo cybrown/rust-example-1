@@ -16,7 +16,7 @@ async fn main() {
         let mut sr = ServiceRegistry::new();
         sr.init().await;
         if args[1] == "server" {
-            run_server(sr.get_post_controller()).await;
+            run_server(Box::new(sr.get_post_domain())).await;
         } else if args[1] == "create_post" {
             run_create_post_command(sr).await;
         }

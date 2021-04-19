@@ -1,5 +1,4 @@
 use crate::configuration::{new_configuration, Configuration};
-use api::PostController;
 use command::CreatePostCommand;
 use db::SqlxPostDb;
 use domain::new_post_domain;
@@ -36,10 +35,6 @@ impl ServiceRegistry {
 
     pub fn get_post_domain(&self) -> impl PostDomain {
         new_post_domain(self.get_db_sqlx())
-    }
-
-    pub fn get_post_controller(&self) -> PostController {
-        PostController::new(Box::new(self.get_post_domain()))
     }
 
     pub fn get_db_sqlx(&self) -> impl PostDb {

@@ -1,8 +1,6 @@
-mod post_controller;
 mod server;
 
 use domain::DomainError;
-pub use post_controller::*;
 pub use server::*;
 use warp::reject::Reject;
 
